@@ -1,7 +1,6 @@
 
-import { ComponentType, createContext, useEffect, useState, useContext } from 'react';
+import {  createContext, useState, useContext } from 'react';
 import { PropsWithChildren, Dispatch, SetStateAction } from 'react';
-import ModalDashboard from '../components/modal/ModalDashboard';
 
 
 type ContextModal = {

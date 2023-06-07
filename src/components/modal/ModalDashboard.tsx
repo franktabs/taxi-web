@@ -1,5 +1,4 @@
 
-import { ComponentType } from 'react';
 import { PropsWithChildren } from 'react';
 
 type Props = PropsWithChildren

@@ -9,10 +9,8 @@ type Props ={
     title: PropsTableUser,
     isNew?:boolean
 }
-type Gens = {a:string}
 type KeyUser = keyof UserTableUser;
 
-let fr:Gens = {a:"arthuer"}
 
 
 export default function CardFormUser({ user, title, isNew = false }:Props) {

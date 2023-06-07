@@ -13,13 +13,13 @@ type Props = {
 
 export default function LigneTableUser({ user, title }: Props) {
 
-    const {modal, setModal} = useModal();
+    const {setModal} = useModal();
 
     const handleClick = useCallback(() => {
         let modal = $(".container-modal");
         modal.toggleClass("d-none");
         setModal(<CardFormUser user={user} title={title} />);
-    }, [user, title])
+    }, [user, title, setModal])
 
     return (
         <tr style={{ cursor: "pointer" }} onClick={handleClick}  >

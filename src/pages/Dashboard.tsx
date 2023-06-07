@@ -1,25 +1,14 @@
 import { FunctionComponent, MouseEvent, useCallback, useState } from "react";
 import { BsFillPersonFill } from "react-icons/bs"
-import { BsFillTaxiFrontFill } from "react-icons/bs"
 import ForView from "../components/ForView";
 import IconChauffeur from './../components/icons/chauffeurs/IconChauffeur';
-import { styled } from "styled-components";
 import CardUser from "../components/cards/user/CardUser";
 import { PropsDataUser } from "../components/cards/user/CardUser";
 import IconFloatUser from "../components/icons/userSingle/IconFloatUser";
 import { useModal } from "../context/ModalProviderContext";
 import ModalDashboard from "../components/modal/ModalDashboard";
+import TableUser, { PropsTableUser } from "../components/table/TableUser";
 
-
-
-type Props = {
-    data?: {
-        nbr?: number, //nombre
-        nv?: number, //nouveau
-        rfs?: number //refuser 
-    },
-    dates?: String[]
-}
 
 
 const initChauffeurs: PropsDataUser = {
@@ -48,7 +37,10 @@ const initCommercial: PropsDataUser = {
 
 
 const Dashboard: FunctionComponent = () => {
-    const {modal, setModal} = useModal();
+    const {modal} = useModal();
+
+    const [viewTable, setViewTable] = useState<PropsTableUser|null>(null)
+
     
     const [dataCartChauffeur, setDataCartChauffeur] = useState<PropsDataUser>(initChauffeurs);
 
@@ -56,13 +48,10 @@ const Dashboard: FunctionComponent = () => {
 
 
     const handleClick = useCallback((event: MouseEvent) => {
-        console.log("object clicked");
-        console.log(event.currentTarget);
-        console.log("------------");
-        console.log(event.target);
+        setViewTable("chauffeurs");
     }, []);
     const handleClick2 = useCallback((event: MouseEvent) => {
-        console.log("object clicked");
+        setViewTable("commerciaux")
     }, []);
 
 
@@ -73,15 +62,26 @@ const Dashboard: FunctionComponent = () => {
                     {modal}
                 </ModalDashboard>
 
-                <CardUser {...dataCartChauffeur} >
+                <CardUser {...dataCartChauffeur} handleClick={handleClick} >
                     <IconChauffeur className=" translate-middle-y ms-2" />
                 </CardUser>
 
-                <CardUser {...initCommercial} >
+                <CardUser {...dataCartCommercial} handleClick={handleClick2} >
                     <IconFloatUser className=" translate-middle-y ms-2" >
                         <BsFillPersonFill className=" fs-1" />
                     </IconFloatUser>
                 </CardUser>
+
+                {
+                    viewTable != null ? (viewTable === "chauffeurs" ?
+                        <div className="mt-5" style={{ maxWidth: "800px" }}>
+                            <TableUser />
+                        </div> :
+
+                        <div className="mt-5" style={{ maxWidth: "800px" }} id="div-commerciaux">
+                            <TableUser title="commerciaux" />
+                        </div>) : null
+                }
 
             </div>
 
