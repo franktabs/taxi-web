@@ -47,3 +47,17 @@ body{
   margin: 0;
   box-sizing: border-box;
 }
+
+.container-modal{
+    z-index: 99;
+    background-color: rgba(0, 0, 0, 0.519);
+    position: fixed;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top:0;
+    left: 0;
+    
+}

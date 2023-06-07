@@ -7,6 +7,8 @@ import { styled } from "styled-components";
 import CardUser from "../components/cards/user/CardUser";
 import { PropsDataUser } from "../components/cards/user/CardUser";
 import IconFloatUser from "../components/icons/userSingle/IconFloatUser";
+import { useModal } from "../context/ModalProviderContext";
+import ModalDashboard from "../components/modal/ModalDashboard";
 
 
 
@@ -46,7 +48,8 @@ const initCommercial: PropsDataUser = {
 
 
 const Dashboard: FunctionComponent = () => {
-
+    const {modal, setModal} = useModal();
+    
     const [dataCartChauffeur, setDataCartChauffeur] = useState<PropsDataUser>(initChauffeurs);
 
     const [dataCartCommercial, setDataCartCommercial] = useState<PropsDataUser>(initCommercial);
@@ -66,6 +69,9 @@ const Dashboard: FunctionComponent = () => {
     return (
         <ForView>
             <div className=" d-flex flex-wrap gap-3" >
+                <ModalDashboard>
+                    {modal}
+                </ModalDashboard>
 
                 <CardUser {...dataCartChauffeur} >
                     <IconChauffeur className=" translate-middle-y ms-2" />

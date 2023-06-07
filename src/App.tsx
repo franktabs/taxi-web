@@ -1,14 +1,17 @@
-import React from 'react';
 import logo from './logo.svg';
+import { useContext, ComponentType, createContext } from 'react';
 import { createBrowserRouter, RouterProvider, createRoutesFromElements, Route } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import "./styles/bootstrap/bootstrap.css";
 import './App.css';
+import ModalProviderContext from './context/ModalProviderContext';
+
+
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
-      <Route path='/' element={<Dashboard/>} />
+      <Route path='/' element={<Dashboard />} />
     </>
   )
 )
@@ -17,7 +20,9 @@ const router = createBrowserRouter(
 function App() {
   return (
     <div className="App">
-      <RouterProvider router={router}/>
+      <ModalProviderContext>
+        <RouterProvider router={router} />
+      </ModalProviderContext>
     </div>
   );
 }
