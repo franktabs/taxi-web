@@ -3,6 +3,8 @@ import { useModal } from "../../context/ModalProviderContext";
 import CardFormUser from "../cards/user/CardFormUser";
 import LigneTableUser from "../ligne/LigneTableUser";
 import { AiOutlinePlus } from "react-icons/ai";
+import $ from "jquery";
+
 
 
 
@@ -17,7 +19,7 @@ type User = {
 
 
 type Props = {
-    title: 'chauffeurs' | 'commerciaux',
+    title?: 'chauffeurs' | 'commerciaux',
 }
 
 export type UserTableUser = User;
@@ -82,9 +84,9 @@ const initCommerciaux:User[] = [
     },
 ]
 
-export default function TableUser({ title }: Props) {
+export default function TableUser({ title="chauffeurs" }: Props) {
 
-    const {modal, setModal} = useModal();
+    const { setModal} = useModal();
 
     const [usersTable, setUsersTable] = useState<User[]>(initChauffeur);
     
@@ -110,7 +112,7 @@ export default function TableUser({ title }: Props) {
         modal.toggleClass("d-none");
         setModal(<CardFormUser user={user} title={title} isNew={true} />);
 
-    }, [title])
+    }, [title, setModal])
 
     
     return (
