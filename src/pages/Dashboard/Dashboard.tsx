@@ -14,6 +14,7 @@ const Dashboard: FunctionComponent = () => {
 
                 <div className=" position-fixed" style={{ left: "10px", top: "10px", bottom: "10px", width: "270px", minHeight: "400px", overflowY: "auto" }} >
                     <NavbarDashboard />
+
                 </div>
 
                 <div style={{ marginLeft: "270px" }}  >

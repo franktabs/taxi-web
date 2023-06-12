@@ -6,6 +6,7 @@ import "./styles/bootstrap/bootstrap.css";
 import './App.css';
 import ModalProviderContext from './context/ModalProviderContext';
 import Utilisateurs from './pages/Dashboard/Utilisateurs';
+import MapDashboard from './pages/Dashboard/MapDashboard';
 
 
 
@@ -16,7 +17,9 @@ const router = createBrowserRouter(
       <Route path='/dashboard' element={<Dashboard/>}>
           <Route path='utilisateurs' element={<Utilisateurs/>} />
           <Route path='notifications' element={<div>NOTIFICATIONS</div>} />
+          <Route path='map' element={<MapDashboard/>} />
       </Route>
+      <Route path='login' element={<div>LOGIN</div> } />
     </>
   )
 )

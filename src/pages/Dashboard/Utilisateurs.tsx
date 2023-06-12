@@ -32,13 +32,35 @@ const initCommercial: PropsDataUser = {
 
 }
 
+abstract class TableViewUser {
 
+    public renderView(title:PropsTableUser = "chauffeurs"):JSX.Element{
+        return (
+            <div className="mt-5" style={{ maxWidth: "800px" }}>
+                <TableUser title={title} />
+            </div> 
+        )
+    }
+}
 
+class ChauffeurTable extends TableViewUser{
+
+    public renderView(title?: PropsTableUser): JSX.Element {
+        return super.renderView();
+    }
+}
+
+class CommercialTable extends TableViewUser{
+
+    public renderView(title?: PropsTableUser): JSX.Element {
+        return super.renderView("commerciaux");
+    }
+}
 
 const Utilisateurs: FunctionComponent = () => {
     const { modal } = useModal();
 
-    const [viewTable, setViewTable] = useState<PropsTableUser | null>(null)
+    const [viewTable, setViewTable] = useState<TableViewUser | null>(null)
 
 
     const [dataCartChauffeur, setDataCartChauffeur] = useState<PropsDataUser>(initChauffeurs);
@@ -47,10 +69,10 @@ const Utilisateurs: FunctionComponent = () => {
 
 
     const handleClick = useCallback((event: MouseEvent) => {
-        setViewTable("chauffeurs");
+        setViewTable(new ChauffeurTable());
     }, []);
     const handleClick2 = useCallback((event: MouseEvent) => {
-        setViewTable("commerciaux")
+        setViewTable(new CommercialTable());
     }, []);
 
 
@@ -71,14 +93,7 @@ const Utilisateurs: FunctionComponent = () => {
             </CardUser>
 
             {
-                viewTable != null ? (viewTable === "chauffeurs" ?
-                    <div className="mt-5" style={{ maxWidth: "800px" }}>
-                        <TableUser />
-                    </div> :
-
-                    <div className="mt-5" style={{ maxWidth: "800px" }} id="div-commerciaux">
-                        <TableUser title="commerciaux" />
-                    </div>) : null
+                viewTable?.renderView()
             }
         </div>
     );

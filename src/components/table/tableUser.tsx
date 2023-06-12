@@ -7,7 +7,6 @@ import $ from "jquery";
 
 
 
-
 type User = {
     nom: string|null,
     birthday?: string|null,
@@ -116,7 +115,7 @@ export default function TableUser({ title="chauffeurs" }: Props) {
 
     
     return (
-        <div className=" bg-white p-3" >
+        <div className=" bg-white p-3 shadow-lg" >
 
             <div style={{ transform: "translateY(-40px)" }} className={" py-3 text-center fw-bold rounded-4 " + (title === "chauffeurs" ? "bg-warning" : "bg-primary text-white")} >
                 <p style={{ margin: 0 }} >
@@ -133,7 +132,7 @@ export default function TableUser({ title="chauffeurs" }: Props) {
                     </div>
                     : null
             }
-            <table className=" table table-hover px-2" >
+            <table className=" table table-hover px-2 " >
                 <thead>
                     <tr>
                         {
@@ -141,6 +140,7 @@ export default function TableUser({ title="chauffeurs" }: Props) {
                                 return <th key={key + value} className=" text-uppercase" > {value} </th>
                             })
                         }
+                        <th className=" text-uppercase" >action</th>
                     </tr>
 
                 </thead>
