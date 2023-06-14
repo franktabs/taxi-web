@@ -1,10 +1,11 @@
-import { useCallback } from "react";
+import { MouseEvent, useCallback } from "react";
 import { useModal } from "../../context/ModalProviderContext"
 import CardFormUser from "../cards/user/CardFormUser";
 import { PropsTableUser, UserTableUser } from "../table/TableUser"
 import { MdRemoveRedEye, MdLocationOn } from "react-icons/md"
 import $ from "jquery";
 import { styled } from "styled-components";
+import { useNavigate } from "react-router";
 
 
 
@@ -23,12 +24,23 @@ const GroupBtnTd = styled.div`
 export default function LigneTableUser({ user, title }: Props) {
 
     const {setModal} = useModal();
+    const navigate = useNavigate()
 
-    const handleClick = useCallback(() => {
-        let modal = $(".container-modal");
-        modal.toggleClass("d-none");
-        setModal(<CardFormUser user={user} title={title} />);
-    }, [user, title, setModal])
+    const handleClick = useCallback((e:MouseEvent) => {
+        var classListButton = e.currentTarget.classList;
+
+        if(classListButton.contains("viewUser")) {
+            console.log("viewUser");
+            let modal = $(".container-modal");
+            modal.toggleClass("d-none");
+            setModal(<CardFormUser user={user} title={title} />);
+        }else if (classListButton.contains("viewCard")){
+            console.log("viewCard");
+            navigate("/dashboard/map", {state:{user, title}});
+        }
+
+        
+    }, [user, title, setModal, navigate])
 
     return (
         <tr style={{ cursor: "pointer" }} className=" align-middle"  >
@@ -41,10 +53,10 @@ export default function LigneTableUser({ user, title }: Props) {
             }
             <td >
                 <GroupBtnTd className=" d-flex gap-2" >
-                    <button className=" btn btn-success" onClick={handleClick} ><MdRemoveRedEye className=" fs-5" /></button>
+                    <button className="viewUser btn btn-success" onClick={handleClick}  ><MdRemoveRedEye className=" fs-5" /></button>
                     {
                         title === "chauffeurs" ? (
-                            <button className=" btn btn-primary" ><MdLocationOn className=" fs-5" /></button>
+                            <button className="viewCard btn btn-primary" onClick={handleClick} ><MdLocationOn className=" fs-5" /></button>
                         ) : null
                     }
                 </GroupBtnTd>

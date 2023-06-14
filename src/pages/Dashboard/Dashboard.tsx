@@ -10,7 +10,7 @@ const Dashboard: FunctionComponent = () => {
 
     return (
         <ForView>
-            <div className=" d-flex flex-wrap gap-3" >
+            <div >
 
                 <div className=" position-fixed" style={{ left: "10px", top: "10px", bottom: "10px", width: "270px", minHeight: "400px", overflowY: "auto" }} >
                     <NavbarDashboard />
