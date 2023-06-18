@@ -1,4 +1,4 @@
-import { FunctionComponent, MouseEvent, useCallback, useState } from "react";
+import { FunctionComponent, MouseEvent, useCallback, useState, useEffect, useMemo, useRef } from "react";
 import { BsFillPersonFill } from "react-icons/bs"
 import IconChauffeur from '../../components/icons/chauffeurs/IconChauffeur';
 import CardUser from "../../components/cards/user/CardUser";
@@ -7,6 +7,9 @@ import IconFloatUser from "../../components/icons/userSingle/IconFloatUser";
 import { useModal } from "../../context/ModalProviderContext";
 import ModalDashboard from "../../components/modal/ModalDashboard";
 import TableUser, { PropsTableUser } from "../../components/table/TableUser";
+import { useLocation } from "react-router";
+import { useUserAuth } from "../../context/UserAuthProviderContext";
+import { Administrateur, Commercial } from "../../Models";
 
 
 
@@ -59,8 +62,11 @@ class CommercialTable extends TableViewUser{
 
 const Utilisateurs: FunctionComponent = () => {
     const { modal } = useModal();
+    const {userAuth} = useUserAuth();
+
 
     const [viewTable, setViewTable] = useState<TableViewUser | null>(null)
+    const location = useLocation();
 
 
     const [dataCartChauffeur, setDataCartChauffeur] = useState<PropsDataUser>(initChauffeurs);
@@ -75,22 +81,44 @@ const Utilisateurs: FunctionComponent = () => {
         setViewTable(new CommercialTable());
     }, []);
 
+    useEffect(()=>{
+        console.log("bienvenu", location.state);
+    },[location])
+
+    const card = useMemo(() => {
+        if (userAuth.user instanceof Commercial) {
+            return (
+                <CardUser {...dataCartChauffeur} handleClick={handleClick} >
+                    <IconChauffeur className=" translate-middle-y ms-2" />
+                </CardUser>
+            )
+        }else if(userAuth.user instanceof Administrateur){
+            return(
+                <>
+                    <CardUser {...dataCartChauffeur} handleClick={handleClick} >
+                        <IconChauffeur className=" translate-middle-y ms-2" />
+                    </CardUser>
+
+                    <CardUser {...dataCartCommercial} handleClick={handleClick2} >
+                        <IconFloatUser className=" translate-middle-y ms-2" >
+                            <BsFillPersonFill className=" fs-1" />
+                        </IconFloatUser>
+                    </CardUser>
+                </>
+            )
+        }
+    }, [dataCartChauffeur, dataCartCommercial, handleClick, handleClick2, userAuth])
 
     return (
-        <div className=" d-flex flex-wrap gap-3" >
+        <div >
             <ModalDashboard>
-                {modal}
+                {modal.value}
             </ModalDashboard>
 
-            <CardUser {...dataCartChauffeur} handleClick={handleClick} >
-                <IconChauffeur className=" translate-middle-y ms-2" />
-            </CardUser>
+            <div className=" d-flex flex-wrap gap-3" >
+                {card}
 
-            <CardUser {...dataCartCommercial} handleClick={handleClick2} >
-                <IconFloatUser className=" translate-middle-y ms-2" >
-                    <BsFillPersonFill className=" fs-1" />
-                </IconFloatUser>
-            </CardUser>
+            </div>
 
             {
                 viewTable?.renderView()

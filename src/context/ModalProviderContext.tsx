@@ -4,13 +4,13 @@ import { PropsWithChildren, Dispatch, SetStateAction } from 'react';
 
 
 type ContextModal = {
-  modal: JSX.Element | null,
-  setModal: Dispatch<SetStateAction<JSX.Element | null>>
+  modal: { value: JSX.Element | null}
+  setModal: Dispatch<SetStateAction<{ value: JSX.Element | null }>>
 }
 
 type Props = PropsWithChildren;
 
-const modalContext = createContext<ContextModal>({ modal: null, setModal: () => { } });
+const modalContext = createContext<ContextModal>({ modal: {value:null}, setModal: () => { } });
 
 
 
@@ -18,7 +18,7 @@ export default function ModalProviderContext({ children }: Props) {
 
 
 
-  const [modal, setModal] = useState<JSX.Element | null>(null);
+  const [modal, setModal] = useState < { value:JSX.Element | null }>({value:null});
   // useEffect(() => {
   //   setModal(<ModalDashboard />)
   // }, [])

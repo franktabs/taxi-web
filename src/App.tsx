@@ -9,6 +9,10 @@ import Utilisateurs from './pages/Dashboard/Utilisateurs';
 import MapDashboard from './pages/Dashboard/MapDashboard';
 import { Button } from '@mui/material';
 import Login from './pages/autthentication/Login';
+import { Provider } from 'react-redux';
+import store from './redux/store';
+import UserAuthProviderContext from './context/UserAuthProviderContext';
+import { authentification } from './utils';
 
 
 
@@ -47,13 +51,30 @@ import Login from './pages/autthentication/Login';
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
-      <Route path='/' loader={({params, request})=>{return redirect('/dashboard/utilisateurs')}} />
-      <Route path='/dashboard' element={<Dashboard/>}>
-          <Route path='utilisateurs' element={<Utilisateurs/>} />
-          <Route path='notifications' element={<div> <Button variant='contained' color="error" >Notifications</Button> </div>} />
-          <Route path='map' element={<MapDashboard/>} />
+      <Route path='/' loader={({ params, request }) => { return redirect('/dashboard/utilisateurs') }} />
+      <Route path='/dashboard' loader={
+        ({params, request})=>{
+          let userAuth = authentification();
+          if(!userAuth){
+            return redirect("/login");
+          }else{
+            return userAuth;
+          }
+        }
+      } element={<Dashboard />}>
+        <Route path='utilisateurs' element={<Utilisateurs />} />
+        <Route path='notifications' element={<div> <Button variant='contained' color="error" >Notifications</Button> </div>} />
+        <Route path='map' element={<MapDashboard />} />
       </Route>
-      <Route path='login' element={<Login/>}  />
+      <Route path='login' loader={
+        ({params, request})=>{
+          let userAuth = authentification();
+          if(userAuth){
+            return redirect("/")
+          }
+          return null
+        }
+      } element={<Login />} />
     </>
   )
 )
@@ -62,9 +83,13 @@ const router = createBrowserRouter(
 function App() {
   return (
     <div className="App">
-      <ModalProviderContext>
-        <RouterProvider router={router} />
-      </ModalProviderContext>
+      <Provider store={store}>
+        <UserAuthProviderContext>
+          <ModalProviderContext>
+            <RouterProvider router={router} />
+          </ModalProviderContext>
+        </UserAuthProviderContext>
+      </Provider>
     </div>
   );
 }

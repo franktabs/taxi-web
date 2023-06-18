@@ -1,24 +1,68 @@
 
 import { BsFillPersonFill } from "react-icons/bs"
 import $ from "jquery"
-import { useCallback, ReactNode} from 'react';
-import type { PropsTableUser, UserTableUser } from "../../table/TableUser";
+import { useCallback, ReactNode, useMemo} from 'react';
+import { excludeColumn, PropsTableUser, UserTableUser } from "../../table/TableUser";
+import { booleanString } from "../../../utils";
 
 type Props ={
     user: UserTableUser,
     title: PropsTableUser,
     isNew?:boolean
 }
-type KeyUser = keyof UserTableUser;
 
 
 
 export default function CardFormUser({ user, title, isNew = false }:Props) {
 
+    type KeyUser = keyof (typeof user.compte);
 
     const handleClick = useCallback(() => {
         $(".container-modal").toggleClass("d-none")
     }, []);
+
+    const ligneBody = useMemo(()=>{
+        let ligneValue = {...user.compte}
+        excludeColumn.forEach((elm)=>{
+            delete ligneValue[elm as (keyof (typeof ligneValue))];
+        })
+
+        return Object.keys(ligneValue).map((value2: any, key) => {
+            var value: KeyUser = value2;
+
+            var tdInput: ReactNode = null;
+            if (title === "commerciaux") {
+                if (value === "type") {
+                    tdInput = <select name="type" id="" className=" form-control form-select">
+                        <option value="freelance">Freelance</option>
+                        <option value="simple">Simple</option>
+                        <option value="chef">Chef</option>
+                    </select>
+                } else if (value === "sexe") {
+                    tdInput = <select name="type" id="" className=" form-control form-select">
+                        <option value="Masculin">Masculin</option>
+                        <option value="Feminin">Feminin</option>
+                    </select>
+                } else {
+                    tdInput = <input className=" form-control" type="text" name={value} value={ligneValue[value] as any || ""} placeholder={value.toUpperCase()} />
+                }
+            } else {
+
+                tdInput = booleanString(ligneValue[value]) as any;
+            }
+
+
+            return (<tr key={value + key} className=" align-middle" >
+                <th className=" text-uppercase" >
+                    {value}
+                </th>
+
+                <td>
+                    {tdInput}
+                </td>
+            </tr>)
+        })
+    },[title, user]);
 
     return (
         <div className=" bg-white"  >
@@ -40,41 +84,7 @@ export default function CardFormUser({ user, title, isNew = false }:Props) {
                     </thead>
                     <tbody>
                         {
-                            Object.keys(user).map((value2:any, key) => {
-                                var value: KeyUser = value2;
-
-                                var tdInput:ReactNode = null;
-                                if (title === "commerciaux") {
-                                    if (value === "type") {
-                                        tdInput = <select name="type" id="" className=" form-control form-select">
-                                            <option value="freelance">Freelance</option>
-                                            <option value="simple">Simple</option>
-                                            <option value="chef">Chef</option>
-                                        </select>
-                                    } else if (value === "sexe") {
-                                        tdInput = <select name="type" id="" className=" form-control form-select">
-                                            <option value="Masculin">Masculin</option>
-                                            <option value="Feminin">Feminin</option>
-                                        </select>
-                                    } else {
-                                        tdInput = <input className=" form-control" type="text" name={value} value={user[value] || ""} placeholder={value.toUpperCase()} />
-                                    }
-                                } else {
-                                    
-                                    tdInput = user[value]
-                                }
-
-
-                                return (<tr key={value + key} className=" align-middle" >
-                                    <th className=" text-uppercase" >
-                                        {value}
-                                    </th>
-
-                                    <td>
-                                        {tdInput}
-                                    </td>
-                                </tr>)
-                            })
+                            ligneBody
                         }
                         <tr>
                             <th>CNI</th>

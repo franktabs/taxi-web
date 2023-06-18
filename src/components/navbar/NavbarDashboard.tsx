@@ -82,7 +82,7 @@ export default function NavbarDashboard() {
                       </NavLink>
                   </li>
                   <li className=" position-absolute bottom-0 d-flex justify-content-start gap-2 fs-5 fw-bold mb-3 align-items-center">
-                      <Link to={"/login"} >
+                      <Link to={"/login"} onClick={()=>localStorage.clear()} >
                           <MdOutlineLogout /> deconnecter
                       </Link>
                   </li>

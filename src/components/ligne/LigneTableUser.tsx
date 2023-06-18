@@ -1,11 +1,12 @@
-import { MouseEvent, useCallback } from "react";
+import { MouseEvent, useCallback, useMemo } from "react";
 import { useModal } from "../../context/ModalProviderContext"
 import CardFormUser from "../cards/user/CardFormUser";
-import { PropsTableUser, UserTableUser } from "../table/TableUser"
+import { excludeColumn, PropsTableUser, UserTableUser } from "../table/TableUser"
 import { MdRemoveRedEye, MdLocationOn } from "react-icons/md"
 import $ from "jquery";
 import { styled } from "styled-components";
 import { useNavigate } from "react-router";
+import { booleanString } from "../../utils";
 
 
 
@@ -23,33 +24,41 @@ const GroupBtnTd = styled.div`
 
 export default function LigneTableUser({ user, title }: Props) {
 
-    const {setModal} = useModal();
+    const { setModal } = useModal();
     const navigate = useNavigate()
 
-    const handleClick = useCallback((e:MouseEvent) => {
+    const handleClick = useCallback((e: MouseEvent) => {
         var classListButton = e.currentTarget.classList;
 
-        if(classListButton.contains("viewUser")) {
+        if (classListButton.contains("viewUser")) {
             console.log("viewUser");
             let modal = $(".container-modal");
             modal.toggleClass("d-none");
-            setModal(<CardFormUser user={user} title={title} />);
-        }else if (classListButton.contains("viewCard")){
+            setModal({ value: <CardFormUser user={user} title={title} /> });
+        } else if (classListButton.contains("viewCard")) {
             console.log("viewCard");
-            navigate("/dashboard/map", {state:{user, title}});
+            navigate("/dashboard/map", { state: { user, title } });
         }
 
-        
+
     }, [user, title, setModal, navigate])
+
+    const tuple = useMemo(()=>{
+        let columnData = {...user.compte}
+        excludeColumn.forEach((element) => {
+            delete columnData[element as (keyof (typeof columnData))];
+        })
+        return Object.values(columnData).map((value2, key) => {
+            let value = value2 != null ? booleanString(value2, "OUI", "NON") : "";
+            if (user.compte.id) return <td key={user.compte.id+key} > {value} </td>
+        })
+    },[user])
 
     return (
         <tr style={{ cursor: "pointer" }} className=" align-middle"  >
 
             {
-                Object.values(user).map((value2, key) => {
-                    let value = value2!=null?value2:"";
-                    return <td key={key + value} > {value} </td>
-                })
+                tuple
             }
             <td >
                 <GroupBtnTd className=" d-flex gap-2" >
