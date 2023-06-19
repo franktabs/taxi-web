@@ -7,6 +7,7 @@ import $ from "jquery";
 import { styled } from "styled-components";
 import { useNavigate } from "react-router";
 import { booleanString } from "../../utils";
+import { Timestamp } from "firebase/firestore";
 
 
 
@@ -49,7 +50,15 @@ export default function LigneTableUser({ user, title }: Props) {
             delete columnData[element as (keyof (typeof columnData))];
         })
         return Object.values(columnData).map((value2, key) => {
-            let value = value2 != null ? booleanString(value2, "OUI", "NON") : "";
+
+            let value: string|number="";
+            if (value2 instanceof Timestamp) {
+                value = value2.toDate().toLocaleDateString();
+            }
+            else if(typeof value2 ==="boolean"){
+               value = booleanString(value2, "OUI", "NON") ;
+            }
+            else if(!(value2 instanceof File)){value = value2}
             if (user.compte.id) return <td key={user.compte.id+key} > {value} </td>
         })
     },[user])

@@ -4,6 +4,7 @@ import $ from "jquery"
 import { useCallback, ReactNode, useMemo} from 'react';
 import { excludeColumn, PropsTableUser, UserTableUser } from "../../table/TableUser";
 import { booleanString } from "../../../utils";
+import { Timestamp } from "firebase/firestore";
 
 type Props ={
     user: UserTableUser,
@@ -47,8 +48,12 @@ export default function CardFormUser({ user, title, isNew = false }:Props) {
                     tdInput = <input className=" form-control" type="text" name={value} value={ligneValue[value] as any || ""} placeholder={value.toUpperCase()} />
                 }
             } else {
-
-                tdInput = booleanString(ligneValue[value]) as any;
+                if (ligneValue[value] instanceof Timestamp) {
+                    let timestamp = ligneValue[value] as Timestamp;
+                    tdInput = timestamp?.toDate().toLocaleDateString();
+                }else {
+                    tdInput = booleanString(ligneValue[value]) as any;
+                }
             }
 
 

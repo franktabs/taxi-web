@@ -1,4 +1,4 @@
-import { CollectionReference, addDoc, collection, getDocs } from "firebase/firestore";
+import { CollectionReference, addDoc, collection, getDocs, Timestamp } from "firebase/firestore";
 import { Administrateur } from "./Administrateur";
 import { Commercial } from "./Commercial";
 import { Compte } from "./Compte";
@@ -30,14 +30,17 @@ export class Chauffeur extends Compte {
     }
 
     static  saveFirebase:(data:{dataForm:ChauffeurAttr|any, commercial_id?:string})=> Promise<Chauffeur|null> = async ({dataForm, commercial_id=""})=>{
-        const nvEnseignantData: ChauffeurAttr = { ...Chauffeur.clearDataChauffeur, ...dataForm };
+        const dataForm2 = dataForm as ChauffeurAttr;
+        dataForm2.date_naissance = Timestamp.fromDate(new Date(dataForm2.date_naissance as string));
+        dataForm2.expiration_cni = Timestamp.fromDate(new Date(dataForm2.expiration_cni as string));
+        const dataChauffeur: ChauffeurAttr = { ...Chauffeur.clearDataChauffeur, ...dataForm2 };
         var isSave = false;
-        let cni_verso = nvEnseignantData.cni_verso as File;
-        let cni_recto = nvEnseignantData.cni_recto as File;
-        nvEnseignantData.cni_recto = cni_recto.name;
-        nvEnseignantData.cni_verso = cni_verso.name;
-        console.log("object data", nvEnseignantData);
-        const chauffeur = new Chauffeur(nvEnseignantData);
+        let cni_verso = dataChauffeur.cni_verso as File;
+        let cni_recto = dataChauffeur.cni_recto as File;
+        dataChauffeur.cni_recto = cni_recto.name;
+        dataChauffeur.cni_verso = cni_verso.name;
+        console.log("object data", dataChauffeur);
+        const chauffeur = new Chauffeur(dataChauffeur);
         chauffeur.compte.commercial_id = commercial_id;
         console.log("avant sauvegarde=>", chauffeur);
         const sauvegarde = await addDoc(collectChauffeur, chauffeur.compte);

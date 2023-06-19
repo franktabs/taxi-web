@@ -19,7 +19,7 @@ import IconChauffeur from "../../components/icons/chauffeurs/IconChauffeur";
 import IconFloatUser from "../../components/icons/userSingle/IconFloatUser";
 import { BsFillPersonFill } from "react-icons/bs";
 import { toLogin } from "../../redux/userAuthSlice";
-import { useAppDispatch } from "../../redux/hooks";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { useUserAuth } from "../../context/UserAuthProviderContext";
 import Swal from "sweetalert2";
 import { KeyUserLocalStorage } from "../../utils";
@@ -37,6 +37,10 @@ function Login() {
     }, []);
 
     const navigate = useNavigate();
+
+    const dispatch = useAppDispatch()
+
+    const selector = useAppSelector(state => state.userAuth.user);
     
     const {setUserAuth} = useUserAuth();
 
@@ -126,7 +130,13 @@ function Login() {
                 title: 'Erreur connexion'
             })
         }
-    }, [navigate, setUserAuth])
+    }, [navigate, setUserAuth]);
+
+    const handleRedux = useCallback(()=>{
+        dispatch(toLogin({user:new Chauffeur(Chauffeur.clearDataChauffeur)}))
+    },[dispatch])
+
+    console.log("voici le selecteur", selector);
 
     return (
         <ForView>
@@ -179,8 +189,8 @@ function Login() {
                         </>
                     ) : (typeLogin.user === "commercial" ?
                         <ContainerForm choiceUser="COMMERCIAL" handleSubmit={handleSubmitCommercial}>
-                            <TextField label="Email" name="email" variant="standard" type='email' className=' w-100 text-capitalize' size="small" required />
-                            <TextField label="Password" name="password" variant="standard" type='password' className=' w-100 text-capitalize' size="small" required />
+                            <TextField label="Email" name="email" variant="standard" type='email' className=' w-100 text-capitalize' required />
+                            <TextField label="Password" name="password" variant="standard" type='password' className=' w-100 text-capitalize' required />
                             <div className=" text-center">
                                 <span>Se Connecter en tant que</span>
                                 <Button variant="text" onClick={() => setTypeLogin({ user: "administrateur", signIn: false })} >Administrateur</Button>

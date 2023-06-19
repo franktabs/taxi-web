@@ -1,18 +1,22 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { Compte } from "../Models";
 
-const initialState:Compte|null = null;
+type StateSlice = { user: Compte | null } 
+
+const initialState: StateSlice = {user:null};
 
 const userAuthSlice = createSlice({
     name:"userAuth",
     initialState,
     reducers:{
-        toLogin:(state:Compte|null, action:PayloadAction<Compte|null> )=>{
-            state = action.payload
+        toLogin:(state:StateSlice, action:PayloadAction<StateSlice> )=>{
+            state.user = action.payload.user;
+            
             console.log("changement du state", state);
+            
         },
-        toLogout:(state:Compte|null)=>{
-            state = null;
+        toLogout:(state:StateSlice)=>{
+            state.user = null;
         }
     }
 

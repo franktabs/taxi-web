@@ -53,13 +53,11 @@ export class Commercial extends Compte {
         const queryCollection = query(collectionChauffeur, where("commercial_id", "==", this.compte.id));
         const dataDocs = await getDocs(queryCollection);
         var isExist = false;
-        var chauffeurs: Chauffeur[] | null = [];
+        var chauffeurs: Chauffeur[] = [];
         dataDocs.forEach((doc) => {
             let chauffeur = new Chauffeur({...Chauffeur.clearDataChauffeur ,...doc.data(), id: doc.id });
-            chauffeurs?.push(chauffeur)
-            console.log("docChauffeur inset=>", chauffeurs);
+            chauffeurs.push(chauffeur)
         });
-        console.log("docChauffeur ouset=>", chauffeurs);
         return chauffeurs;
     }
 

@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore";
+
 
 
 export type PositionType = {
@@ -7,6 +9,7 @@ export type PositionType = {
 
 export interface CompteAttr {
     id?: string;
+    code?: string;
     nom: string;
     email: string;
     quartier?: string;
@@ -19,6 +22,8 @@ export interface CompteAttr {
     cni?: string;
     sexe?:"M"|"F";
     type?:string;
+    expiration_cni?: Timestamp|string;
+    date_naissance?:Timestamp|string;
 }
 
 export interface ChauffeurAttr extends CompteAttr {
@@ -30,7 +35,6 @@ export interface ChauffeurAttr extends CompteAttr {
 }
 
 export interface CommercialAttr extends CompteAttr {
-    code?: string;
     administrateur_id?: string;
 }
 

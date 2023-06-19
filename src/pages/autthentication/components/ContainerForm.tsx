@@ -29,7 +29,7 @@ export default function ContainerForm({title="CONNEXION", choiceUser, handleSubm
                 <form className=" d-flex flex-wrap gap-3 justify-content-center px-2" id="formLogin" style={{ marginTop: "-30px", maxHeight: "80vh", overflowY: "auto" }} >
 
                     <span className=" fw-bold text-center fs-3" >{choiceUser}</span>
-                    <div className=" d-flex flex-wrap gap-3 justify-content-center" >
+                    <div className=" d-flex flex-wrap gap-3 justify-content-start" >
                         {
                             children
                         }
