@@ -36,6 +36,8 @@ function Login() {
         console.log("login lancé");
     }, []);
 
+    
+
     const navigate = useNavigate();
 
     const dispatch = useAppDispatch()
@@ -211,7 +213,7 @@ function Login() {
                                 </ContainerForm> :
                                 <ContainerForm choiceUser="CHAUFFEUR" title="INSCRIPTION" handleSubmit={handleSubmitAdministrateur}>
                                     {
-                                        user.signInTextField()
+                                        // user.signInTextField()
                                     }
                                         <Button variant="text" color="error" onClick={() => setTypeLogin({ user: null, signIn: false })} >Annuler</Button>
 

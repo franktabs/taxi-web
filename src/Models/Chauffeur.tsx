@@ -35,10 +35,10 @@ export class Chauffeur extends Compte {
         dataForm2.expiration_cni = Timestamp.fromDate(new Date(dataForm2.expiration_cni as string));
         const dataChauffeur: ChauffeurAttr = { ...Chauffeur.clearDataChauffeur, ...dataForm2 };
         var isSave = false;
-        let cni_verso = dataChauffeur.cni_verso as File;
-        let cni_recto = dataChauffeur.cni_recto as File;
-        dataChauffeur.cni_recto = cni_recto.name;
-        dataChauffeur.cni_verso = cni_verso.name;
+        let cni_verso = dataChauffeur.cni_verso as FileList;
+        let cni_recto = dataChauffeur.cni_recto as FileList;
+        dataChauffeur.cni_recto = cni_recto["0"].name;
+        dataChauffeur.cni_verso = cni_verso["0"].name;
         console.log("object data", dataChauffeur);
         const chauffeur = new Chauffeur(dataChauffeur);
         chauffeur.compte.commercial_id = commercial_id;

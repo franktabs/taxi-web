@@ -111,7 +111,7 @@ const Utilisateurs: FunctionComponent = () => {
 
     return (
         <div >
-            <ModalDashboard>
+            <ModalDashboard id="container-modal">
                 {modal.value}
             </ModalDashboard>
 

@@ -30,3 +30,24 @@ export function booleanString(value:any, valueTrue:string="OUI", valueFalse:stri
     }
     return value
 }
+
+export function checkFileImg(file:File|FileList) {
+    if(file instanceof FileList){
+        file = file[0] as File;
+    }
+    
+    if (file) {
+        var fileSize = file.size; // Taille du fichier en octets
+        var fileType = file.type; // Type MIME du fichier
+
+        if (fileSize > 1024 * 1024) { // Vérifie si la taille du fichier est supérieure à 1 Mo
+            return "doit être inférieur à 1Mo"
+        } else if (fileType !== 'image/jpeg' && fileType !== 'image/png') { // Vérifie si le type du fichier est JPEG ou PNG
+            return 'Veuillez sélectionner une image JPEG ou PNG.'
+        } else {
+            return true
+        }
+    } else {
+        return 'Aucun fichier sélectionné.'
+    }
+}

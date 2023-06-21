@@ -1,11 +1,11 @@
 
 import { PropsWithChildren } from 'react';
 
-type Props = PropsWithChildren
+type Props = PropsWithChildren<{id:string}>
 
-export default function ModalDashboard({children}:Props) {
+export default function ModalDashboard({id,children}:Props) {
   return (
-      <div className="container-modal d-none" id="container-modal" >
+    <div className={`${id} d-none`} id={id} >
           {children}
       </div>
   )

@@ -1,4 +1,6 @@
 import { Timestamp } from "firebase/firestore";
+import { UseFormRegister, FieldErrors, UseFormSetError } from "react-hook-form/dist/types";
+import { Compte } from "./Compte";
 
 
 
@@ -16,8 +18,8 @@ export interface CompteAttr {
     tel?: number;
     access: boolean;
     password: string;
-    cni_recto?: string | File;
-    cni_verso?: string | File;
+    cni_recto?: string | File | FileList;
+    cni_verso?: string | File | FileList;
     pays: string;
     cni?: string;
     sexe?:"M"|"F";
@@ -38,4 +40,13 @@ export interface CommercialAttr extends CompteAttr {
     administrateur_id?: string;
 }
 
+export type ModelAttr = ChauffeurAttr | CompteAttr | CommercialAttr
+
+export type ParamsTextField = {
+    register:UseFormRegister<ModelAttr>,
+    errors: FieldErrors<ModelAttr>,
+    setError?: UseFormSetError<ModelAttr>,
+    users?:Compte[]|null;
+    setUsers?: React.Dispatch<React.SetStateAction<Compte[]|null>>
+}
 
