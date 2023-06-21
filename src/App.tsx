@@ -13,6 +13,7 @@ import { Provider } from 'react-redux';
 import store from './redux/store';
 import UserAuthProviderContext from './context/UserAuthProviderContext';
 import { authentification } from './utils';
+import AllProvider from './AllProvider';
 
 
 
@@ -53,11 +54,11 @@ const router = createBrowserRouter(
     <>
       <Route path='/' loader={({ params, request }) => { return redirect('/dashboard/utilisateurs') }} />
       <Route path='/dashboard' loader={
-        ({params, request})=>{
+        ({ params, request }) => {
           let userAuth = authentification();
-          if(!userAuth){
+          if (!userAuth) {
             return redirect("/login");
-          }else{
+          } else {
             return userAuth;
           }
         }
@@ -67,9 +68,9 @@ const router = createBrowserRouter(
         <Route path='map' element={<MapDashboard />} />
       </Route>
       <Route path='login' loader={
-        ({params, request})=>{
+        ({ params, request }) => {
           let userAuth = authentification();
-          if(userAuth){
+          if (userAuth) {
             return redirect("/")
           }
           return null
@@ -84,11 +85,9 @@ function App() {
   return (
     <div className="App">
       <Provider store={store}>
-        <UserAuthProviderContext>
-          <ModalProviderContext>
-            <RouterProvider router={router} />
-          </ModalProviderContext>
-        </UserAuthProviderContext>
+        <AllProvider>
+          <RouterProvider router={router} />
+        </AllProvider>
       </Provider>
     </div>
   );
