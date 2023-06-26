@@ -48,7 +48,7 @@ body{
   box-sizing: border-box;
 }
 
-.container-modal, .container-modal2{
+.container-modal, .container-modal2, .container-modal3{
     z-index: 99;
     background-color: rgba(0, 0, 0, 0.519);
     position: fixed;
@@ -60,4 +60,15 @@ body{
     top:0;
     left: 0;
     
+}
+.w-maxContent{
+  width: max-content;
+}
+
+.monstyle{
+  transition: all .8s;
+}
+
+.monstyle:hover{
+  transform: scale(1.2);
 }

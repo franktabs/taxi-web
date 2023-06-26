@@ -26,6 +26,8 @@ export interface CompteAttr {
     type?:string;
     expiration_cni?: Timestamp|string;
     date_naissance?:Timestamp|string;
+    created_at?:Timestamp|string;
+    updated_at?:Timestamp|string;
 }
 
 export interface ChauffeurAttr extends CompteAttr {
@@ -47,6 +49,7 @@ export type ParamsTextField = {
     errors: FieldErrors<ModelAttr>,
     setError?: UseFormSetError<ModelAttr>,
     users?:Compte[]|null;
-    setUsers?: React.Dispatch<React.SetStateAction<Compte[]|null>>
+    setEnableQueryUsers?: React.Dispatch<React.SetStateAction<boolean>>
 }
+
 

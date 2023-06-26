@@ -39,7 +39,7 @@ abstract class TableViewUser {
 
     public renderView(title:PropsTableUser = "chauffeurs"):JSX.Element{
         return (
-            <div className="mt-5" style={{ maxWidth: "800px" }}>
+            <div className="mt-5" style={{ maxWidth: "90%" }}>
                 <TableUser title={title} />
             </div> 
         )

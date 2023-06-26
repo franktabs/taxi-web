@@ -56,7 +56,7 @@ function Login() {
         let instanceUser = await Commercial.login(data);
         const Toast = Swal.mixin({
             toast: true,
-            position: 'top-end',
+            position: 'top',
             showConfirmButton: false,
             timer: 3000,
             timerProgressBar: true,
@@ -85,7 +85,7 @@ function Login() {
 
             Toast.fire({
                 icon: "error",
-                title: 'Erreur connexion'
+                title: 'Echec Connexion'
             })
         }
     }, [navigate, setUserAuth])
@@ -97,7 +97,7 @@ function Login() {
         let instanceUser = await Administrateur.login(data);
         const Toast = Swal.mixin({
             toast: true,
-            position: 'top-end',
+            position: "top",
             showConfirmButton: false,
             timer: 3000,
             timerProgressBar: true,
@@ -129,7 +129,7 @@ function Login() {
 
             Toast.fire({
                 icon: "error",
-                title: 'Erreur connexion'
+                title: 'Echec Connexion'
             })
         }
     }, [navigate, setUserAuth]);
@@ -146,44 +146,44 @@ function Login() {
                 {
                     typeLogin.user == null && typeLogin.signIn===false ? (
                         <>
-                            <div className=" bg-white rounded-2 shadow-lg d-flex flex-column align-items-center p-3" >
+                            <div className="monstyle bg-white rounded-2 shadow-lg d-flex flex-column align-items-center p-3 w-25" >
                                 <div >
                                     <IconChauffeur className=" translate-middle position-absolute" />
                                 </div>
                                 <div className=" mt-5"  >
-                                    <h3 className=" text-warning fw-bolder" style={{ marginTop:"-12px" }} >CHAUFFEUR </h3>
+                                    <h3 className=" text-warning fw-bolder fs-1" style={{ marginTop:"-12px" }} >CHAUFFEUR </h3>
                                 </div>
                                 <div className=" mt-2">
-                                    <Button variant="contained" color="success" onClick={() => setTypeLogin({ user: null, signIn: true })} >S'inscrire</Button>
+                                    <Button variant="contained" color="success" className=" fw-bold" onClick={() => setTypeLogin({ user: null, signIn: true })} >S'inscrire</Button>
                                 </div>
 
                             </div>
-                            <div className=" bg-white rounded-2 shadow-lg d-flex flex-column align-items-center p-3" >
+                            <div className="monstyle bg-white rounded-2 shadow-lg d-flex flex-column align-items-center p-3 w-25" >
                                 <div >
                                     <IconFloatUser className=" translate-middle position-absolute" >
                                         <BsFillPersonFill className=" fs-1" />
                                     </IconFloatUser>
                                 </div>
                                 <div className=" mt-5"  >
-                                    <h3 className=" text-primary fw-bolder" style={{ marginTop:"-12px" }} >COMMERCIAL </h3>
+                                    <h3 className=" text-primary fw-bolder fs-1" style={{ marginTop:"-12px" }} >COMMERCIAL </h3>
                                 </div>
                                 <div className=" mt-2">
-                                    <Button variant="contained" color="success" onClick={() => setTypeLogin({ user: "commercial", signIn: false })} >Se connecter</Button>
+                                    <Button variant="contained" color="success" className=" fw-bold" onClick={() => setTypeLogin({ user: "commercial", signIn: false })} >Se connecter</Button>
                                 </div>
                             </div>
 
 
-                            <div className=" bg-white rounded-2 shadow-lg d-flex flex-column align-items-center p-3" >
+                            <div className="monstyle bg-white rounded-2 shadow-lg d-flex flex-column align-items-center p-3 w-25" >
                                 <div >
                                     <IconFloatUser className=" translate-middle position-absolute" >
                                         <BsFillPersonFill className=" fs-1" />
                                     </IconFloatUser>
                                 </div>
                                 <div className=" mt-5"  >
-                                    <h3 className=" text-danger fw-bolder" style={{ marginTop:"-12px" }} >ADMINISTRATEUR </h3>
+                                    <h3 className=" text-danger fw-bolder fs-1" style={{ marginTop:"-12px" }} >ADMINISTRATEUR </h3>
                                 </div>
                                 <div className=" mt-2">
-                                    <Button variant="contained" color="success" onClick={() => setTypeLogin({ user: "administrateur", signIn: false })} >Se connecter</Button>
+                                    <Button variant="contained" color="success" className=" fw-bold" onClick={() => setTypeLogin({ user: "administrateur", signIn: false })} >Se connecter</Button>
                                 </div>
 
                             </div>
@@ -206,7 +206,7 @@ function Login() {
                                     <TextField label="Password" name="password" variant="standard" type='password' className=' w-100 text-capitalize' size="small" required />
                                     <div className=" text-center">
                                         <span>Se Connecter en tant que</span>
-                                        <Button variant="text" onClick={() => setTypeLogin({ user: "commercial", signIn: false })} >Commercial</Button><br />
+                                        <Button variant="text" onClick={() => setTypeLogin({ user: "commercial", signIn: false })} >Commercial</Button>
                                         <Button variant="text" color="error" onClick={() => setTypeLogin({ user: null, signIn: false })} >Annuler</Button>
 
                                     </div>

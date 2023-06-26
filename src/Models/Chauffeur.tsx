@@ -4,9 +4,10 @@ import { Commercial } from "./Commercial";
 import { Compte } from "./Compte";
 import { ChauffeurAttr } from "./type";
 import { db } from "../firebase";
+import { hashPassword } from "../utils";
 
 // const emptyDataChauffeur: ChauffeurAttr = { online: false, position: { lat: 0, lng: 0 }, treated: false, nom: "", email: "", password: "", quartier: "", tel: 0, cni_recto: "", cni_verso: "", access: false, pays: "Cameroun", type:"", sexe:"M", cni:"" };
-const collectChauffeur = collection(db, "chauffeur");
+const collectChauffeur = collection(db, "chauffeur") as CollectionReference<ChauffeurAttr>;
 
 export class Chauffeur extends Compte {
 
@@ -19,6 +20,7 @@ export class Chauffeur extends Compte {
         super(compte);
         this.commercial = null;
         this.administrateur = null;
+        this.collection = collectChauffeur;
     }
 
     toDataFirebase(): ChauffeurAttr {
@@ -37,6 +39,8 @@ export class Chauffeur extends Compte {
         var isSave = false;
         let cni_verso = dataChauffeur.cni_verso as FileList;
         let cni_recto = dataChauffeur.cni_recto as FileList;
+        let password = dataChauffeur.password;
+        dataChauffeur.password = hashPassword(password);
         dataChauffeur.cni_recto = cni_recto["0"].name;
         dataChauffeur.cni_verso = cni_verso["0"].name;
         console.log("object data", dataChauffeur);

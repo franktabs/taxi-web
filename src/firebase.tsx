@@ -30,4 +30,4 @@ export const storage = getStorage(app);
 
 
 
-
+type A = Exclude<number|string, number>

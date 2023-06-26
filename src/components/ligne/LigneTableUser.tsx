@@ -13,7 +13,8 @@ import { Timestamp } from "firebase/firestore";
 
 type Props = {
     user: UserTableUser,
-    title: PropsTableUser
+    title: PropsTableUser,
+    setRefresh: React.Dispatch<React.SetStateAction<{ val: boolean }>>
 }
 
 const GroupBtnTd = styled.div`
@@ -23,7 +24,7 @@ const GroupBtnTd = styled.div`
     color: white;
 `
 
-export default function LigneTableUser({ user, title }: Props) {
+export default function LigneTableUser({ user, title, setRefresh }: Props) {
 
     const { setModal } = useModal();
     const navigate = useNavigate()
@@ -32,17 +33,16 @@ export default function LigneTableUser({ user, title }: Props) {
         var classListButton = e.currentTarget.classList;
 
         if (classListButton.contains("viewUser")) {
-            console.log("viewUser");
             let modal = $(".container-modal");
             modal.toggleClass("d-none");
-            setModal({ value: <CardFormUser user={user} title={title} /> });
+            setModal({ value: <CardFormUser user={user} title={title} setRefresh={setRefresh} /> });
         } else if (classListButton.contains("viewCard")) {
             console.log("viewCard");
             navigate("/dashboard/map", { state: { user, title } });
         }
 
 
-    }, [user, title, setModal, navigate])
+    }, [user, title, setModal, navigate, setRefresh])
 
     const tuple = useMemo(()=>{
         let columnData = {...user.compte}
@@ -59,16 +59,12 @@ export default function LigneTableUser({ user, title }: Props) {
                value = booleanString(value2, "OUI", "NON") ;
             }
             else if (!(value2 instanceof File || value2 instanceof FileList )){value = value2}
-            if (user.compte.id) return <td key={user.compte.id+key} > {value} </td>
+            if (user.compte.id) return <td key={user.compte.id + key}  > <div className=" w-maxContent" >{value}</div> </td>
         })
     },[user])
 
     return (
         <tr style={{ cursor: "pointer" }} className=" align-middle"  >
-
-            {
-                tuple
-            }
             <td >
                 <GroupBtnTd className=" d-flex gap-2" >
                     <button className="viewUser btn btn-success" onClick={handleClick}  ><MdRemoveRedEye className=" fs-5" /></button>
@@ -79,6 +75,11 @@ export default function LigneTableUser({ user, title }: Props) {
                     }
                 </GroupBtnTd>
             </td>
+
+            {
+                tuple
+            }
+
         </tr>
     )
 }
