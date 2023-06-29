@@ -58,7 +58,7 @@ export default function LigneTableUser({ user, title, setRefresh }: Props) {
             else if(typeof value2 ==="boolean"){
                value = booleanString(value2, "OUI", "NON") ;
             }
-            else if (!(value2 instanceof File || value2 instanceof FileList )){value = value2}
+            else if (!(value2 instanceof File || value2 instanceof FileList )){value = value2 as string | number}
             if (user.compte.id) return <td key={user.compte.id + key}  > <div className=" w-maxContent" >{value}</div> </td>
         })
     },[user])

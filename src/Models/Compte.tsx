@@ -1,31 +1,135 @@
-import { Box, FormControl, FormLabel, InputAdornment, TextField } from "@mui/material";
-import { CompteAttr, ModelAttr, ParamsTextField } from "./type";
+import { Box, FilledInput, FormControl, FormLabel, InputAdornment, TextField } from "@mui/material";
+import { ChauffeurAttr, CompteAttr, KeyModelAttr, ModelAttr, ParamsTextField, SaveImage } from "./type";
 import RowRadioButtonsGroup from '../components/input/RowRadioButtonsGroup';
 import { RegisterOptions } from "react-hook-form";
 import { MdImage } from "react-icons/md";
 import { checkFileImg } from "../utils";
 import { CollectionReference } from 'firebase/firestore';
+import { getDownloadURL, ref, uploadBytes, uploadBytesResumable } from "firebase/storage";
+import { storage } from "../firebase";
+import Swal from "sweetalert2";
 
 
 export abstract class Compte {
-    public collection: CollectionReference<CompteAttr> | null;
+    public collection: CollectionReference<CompteAttr | ChauffeurAttr> | null;
     constructor(public compte: CompteAttr) {
         this.compte = compte;
         this.collection = null;
     }
 
-    static dataClearCompte: CompteAttr = { nom: "", email: "", password: "", quartier: "", date_naissance: "", tel: 237, sexe: "M", cni: "", pays: "Cameroun", expiration_cni: "", code: "", cni_recto: "", cni_verso: "", access: false, type: "", created_at:"", updated_at:"" }
+    static dataClearCompte: CompteAttr = { nom: "", email: "", password: "", quartier: "", date_naissance: "", tel: 237, sexe: "M", cni: "", pays: "Cameroun", expiration_cni: "", code: "", cni_recto: "", cni_verso: "", access: false, type: "", created_at: "", updated_at: "", photo: "" }
 
+
+    static async saveImage({ file, name, code, user }: SaveImage) {
+        if (file instanceof FileList) {
+            let fichier = file.item(0);
+            if (fichier) {
+                var fichierRef = null;
+                if (fichier.type === "image/png") {
+                    fichierRef = ref(storage, "images/" + code + "/" + name + ".png");
+                } else if (fichier.type === "image/jpeg") {
+                    fichierRef = ref(storage, "images/" + code + "/" + name + ".jpeg");
+                } else if (fichier.type === "image/jpg") {
+                    fichierRef = ref(storage, "images/" + code + "/" + name + ".jpg");
+                }
+                if (fichierRef) {
+                    try {
+                        const uploadTask = await uploadBytes(fichierRef, fichier);
+                        let url = await getDownloadURL(fichierRef);
+                        //@ts-ignore
+                        user.compte[name] = url;
+                    } catch {
+                        const Toast = Swal.mixin({
+                            toast: true,
+                            position: 'top',
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true,
+                            didOpen: (toast) => {
+                                toast.addEventListener('mouseenter', Swal.stopTimer)
+                                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                            }
+                        })
+                        Toast.fire({
+                            icon: "warning",
+                            title: 'Un problème rencontré (Stockage de ' + name + ")"
+                        })
+
+                    }
+
+                    // await uploadTask.on("state_changed",
+                    //     (snapshot) => {
+                    //         const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    //         console.log('Upload is ' + progress + '% done');
+                    //         switch (snapshot.state) {
+                    //             case 'paused':
+                    //                 console.log('Upload is paused');
+                    //                 break;
+                    //             case 'running':
+                    //                 console.log('Upload is running');
+                    //                 break;
+                    //         }
+                    //     },
+                    //     (error)=>{
+                    //         const Toast = Swal.mixin({
+                    //             toast: true,
+                    //             position: 'top',
+                    //             showConfirmButton: false,
+                    //             timer: 3000,
+                    //             timerProgressBar: true,
+                    //             didOpen: (toast) => {
+                    //                 toast.addEventListener('mouseenter', Swal.stopTimer)
+                    //                 toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    //             }
+                    //         })
+                    //         switch (error.code) {
+                    //             case 'storage/unauthorized':
+                    //                 Toast.fire({
+                    //                     icon: "warning",
+                    //                     title: 'Non Authorisé (Stockage de '+name+")"
+                    //                 })
+                    //                 break;
+                    //             case 'storage/canceled':
+                    //                 Toast.fire({
+                    //                     icon: "warning",
+                    //                     title: 'Annulé (Stockage de ' + name + ")"
+                    //                 })
+                    //                 break;
+
+                    //             // ...
+
+                    //             case 'storage/unknown':
+                    //                 Toast.fire({
+                    //                     icon: "warning",
+                    //                     title: 'Un problème rencontré (Stockage de ' + name + ")"
+                    //                 })
+                    //                 break;
+                    //         }
+                    //     },
+                    //     ()=>{
+                    //         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                    //             //@ts-ignore
+                    //             user.compte[name] = downloadURL;
+                    //             console.log("sauvegarde ", name,"reussi");
+                    //         });
+                    //     }
+                    // )
+                }
+            }
+
+        }
+
+    }
 
     signInTextField({ register, errors, users, setEnableQueryUsers }: ParamsTextField) {
         type TypeRegister = typeof register extends (name: infer T, options: infer P) => any ? P : never;
         let textField = [];
-        let textFieldList: Array<keyof CompteAttr> = ["nom", "quartier", "cni"];
-        let sameTypeNameList: Array<keyof CompteAttr> = ["email", "password"];
-        let radioList: Array<keyof CompteAttr> = ["sexe"];
-        let dateList: Array<keyof CompteAttr> = ["date_naissance", "expiration_cni"];
-        let fileList: Array<keyof CompteAttr> = ["cni_recto", "cni_verso"];
-        let numberList: Array<keyof CompteAttr> = ["tel"];
+        let textFieldList: Array<keyof ModelAttr> = ["nom", "quartier", "cni"];
+        let sameTypeNameList: Array<keyof ModelAttr> = ["email", "password"];
+        let radioList: Array<keyof ModelAttr> = ["sexe"];
+        let dateList: Array<keyof ModelAttr> = ["date_naissance", "expiration_cni"];
+        let fileList: Array<KeyModelAttr> = ["cni_recto", "cni_verso", "permi_conduire", "carte_grise", "assurance", "immatriculation"];
+        let numberList: Array<keyof ModelAttr> = ["tel"];
         let keyCompte = this.compte ? this.compte : [];
         textField = Object.keys(keyCompte).map((value2: any, index) => {
 
@@ -47,13 +151,13 @@ export abstract class Compte {
                                     for (let user of users) {
 
                                         val = val as string;
-                                        if (user.compte.cni?.trim() === val.trim()){
+                                        if (user.compte.cni?.trim() === val.trim()) {
                                             existe = true;
                                             break;
                                         }
-                                            
+
                                     }
-                                    return existe?"N° CNI existe déjà":true;
+                                    return existe ? "N° CNI existe déjà" : true;
                                 }
                                 return "CNI non Verifié"
                             }
@@ -66,20 +170,34 @@ export abstract class Compte {
             } else if (fileList.includes(value)) {
                 options.validate = {
                     isValidFile: (val) => {
+
                         if ((val instanceof File) || (val instanceof FileList)) {
                             return checkFileImg(val)
                         }
 
                     }
                 }
-                return <TextField error={errors[value] ? true : false} helperText={errors[value] && errors[value]?.message} label={value} key={index + value} {...register(value, options as any)} variant="outlined" sx={{ m: 1, width: '25ch' }}
-                    InputProps={{
-                        startAdornment: <InputAdornment position="start"><MdImage className=" fs-3" /></InputAdornment>,
-                    }} placeholder={value} title={value} type='file' className=' w-100 text-capitalize' required />
+                return <div >
+                    <FormLabel className=" text-capitalize"> {value + "*"} </FormLabel>
+                    <div className="input-group has-validation">
+                        <span className="input-group-text" id="inputGroupPrepend"> <InputAdornment position="start"><MdImage className=" fs-3" /></InputAdornment> </span>
+                        <input type="file" accept=".jpg, .jpeg, .png" capture={"environment"} {...register(value, options as any)} className={errors[value] ? "form-control is-invalid" : "form-control"} id={value} aria-describedby="inputGroupPrepend" required />
+                        {
+                            errors[value] ? <div className=" invalid-feedback text-capitalize">
+                                {errors[value]?.message}
+                            </div> : null
+                        }
+                    </div>
+                </div>
+                // <TextField error={errors[value] ? true : false} helperText={errors[value] && errors[value]?.message} label={value} key={index + value} {...register(value, options as any)} variant="outlined" sx={{ m: 1, width: '25ch' }}
+                //     InputProps={{
+                //         startAdornment: <InputAdornment position="start"><MdImage className=" fs-3" /></InputAdornment>,
+                //         accept:"images/jpeg"
+                //     }} placeholder={value} title={value} type='file' className=' w-100 text-capitalize' required />
             }
             else if (radioList.includes(value)) {
                 if (value === "sexe")
-                    return <RowRadioButtonsGroup key={index + value} input={[{ label: "Masculin", value: "M" }, { label: "Feminin", value: "F" }]} title="Sexe" name={value} />
+                    return <RowRadioButtonsGroup key={index + value} input={[{ label: "Masculin", value: "M" }, { label: "Feminin", value: "F" }]} title="Sexe" name={value} register={register} />
             }
             else if (dateList.includes(value)) {
                 options.valueAsDate = true;
@@ -109,13 +227,13 @@ export abstract class Compte {
                                 let existe = false;
                                 for (let user of users) {
                                     val = val as string;
-                                    if (user.compte.email.trim() === val.trim()){
+                                    if (user.compte.email.trim() === val.trim()) {
                                         existe = true;
                                         break;
                                     }
-                                        
+
                                 }
-                                return existe?"Email exist déjà":true;
+                                return existe ? "Email exist déjà" : true;
                             }
                             return "Email non vérifié"
                         }

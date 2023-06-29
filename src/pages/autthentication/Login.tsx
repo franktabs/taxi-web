@@ -23,6 +23,7 @@ import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { useUserAuth } from "../../context/UserAuthProviderContext";
 import Swal from "sweetalert2";
 import { KeyUserLocalStorage } from "../../utils";
+import $ from "jquery"
 
 type ChoiceLogin = {
     user: "commercial" | "administrateur" | null,
@@ -53,6 +54,7 @@ function Login() {
         event.preventDefault();
         const formdata = new FormData(document.getElementById("formLogin") as HTMLFormElement);
         const data = Object.fromEntries(formdata.entries())
+        $(".loaderDualRing").removeClass("d-none");
         let instanceUser = await Commercial.login(data);
         const Toast = Swal.mixin({
             toast: true,
@@ -65,6 +67,7 @@ function Login() {
                 toast.addEventListener('mouseleave', Swal.resumeTimer)
             }
         })
+
         if (instanceUser) {
             console.log("Connexion reussi");
             setUserAuth({user:instanceUser});
@@ -88,12 +91,16 @@ function Login() {
                 title: 'Echec Connexion'
             })
         }
+        $(".loaderDualRing").addClass("d-none");
     }, [navigate, setUserAuth])
 
     const handleSubmitAdministrateur = useCallback(async (event: MouseEvent) => {
         event.preventDefault();
         const formdata = new FormData(document.getElementById("formLogin") as HTMLFormElement);
         const data = Object.fromEntries(formdata.entries())
+
+        $(".loaderDualRing").removeClass("d-none");
+
         let instanceUser = await Administrateur.login(data);
         const Toast = Swal.mixin({
             toast: true,
@@ -132,6 +139,8 @@ function Login() {
                 title: 'Echec Connexion'
             })
         }
+        $(".loaderDualRing").addClass("d-none");
+
     }, [navigate, setUserAuth]);
 
     const handleRedux = useCallback(()=>{

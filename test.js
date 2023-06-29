@@ -12,3 +12,8 @@ if (actuelMonth === month) {
 }
 let code = "CO" + year + actuelMonth.toString().padStart(2, "0") + nombre;
 console.log(code);
+
+let obj = {a:{a:"a", b:"b"}, b:"b"}
+let myvar = obj.a
+myvar.a="change"
+console.log(obj)

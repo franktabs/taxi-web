@@ -1,7 +1,7 @@
-import { Administrateur, Commercial, Compte, Chauffeur } from "../Models";
+import { Administrateur, Commercial, Compte, Chauffeur, ChauffeurAttr } from "../Models";
 import { KeyUserLocalStorage } from "./type";
 import bcrypt from "bcryptjs-react";
-import { CollectionReference, addDoc, collection, getDocs, Timestamp, query, orderBy, limit } from "firebase/firestore";
+import { CollectionReference, addDoc, collection, getDocs, Timestamp, query, orderBy, limit, Query } from "firebase/firestore";
 
 
 export function authentification() {
@@ -37,6 +37,7 @@ export function booleanString(value: any, valueTrue: string = "OUI", valueFalse:
 export function checkFileImg(file: File | FileList) {
     if (file instanceof FileList) {
         file = file[0] as File;
+
     }
 
     if (file) {
@@ -45,8 +46,8 @@ export function checkFileImg(file: File | FileList) {
 
         if (fileSize > 1024 * 1024) { // Vérifie si la taille du fichier est supérieure à 1 Mo
             return "doit être inférieur à 1Mo"
-        } else if (fileType !== 'image/jpeg' && fileType !== 'image/png') { // Vérifie si le type du fichier est JPEG ou PNG
-            return 'Veuillez sélectionner une image JPEG ou PNG.'
+        } else if (fileType !== 'image/jpeg' && fileType !== 'image/png'&& fileType!== "image/jpg") { // Vérifie si le type du fichier est JPEG ou PNG
+            return 'Veuillez sélectionner une image JPEG, JPG ou PNG.'
         } else {
             return true
         }
@@ -99,5 +100,46 @@ export async function codePromo(user: Commercial | Chauffeur): Promise<string|nu
         }
 
     }
+    else if (user instanceof Chauffeur){
+        if(user.collection){
+            const q1 = query(user.collection, orderBy("code", "desc"), limit(1));
+            const q = q1 as Query<ChauffeurAttr>
+            const chauffeurs = await Chauffeur.find(q);
+            const chauffeur = chauffeurs[0];
+            let code = genCode({lastUser:chauffeur, twoLetter:"CH"})
+            user.compte.code  = code;
+            return code
+        }
+    }
     return null
 }
+
+function genCode({lastUser, twoLetter}:{lastUser:Commercial|Chauffeur, twoLetter:string}){
+    let lastCode = lastUser.compte.code
+    if (lastCode) {
+        let month = parseInt(lastCode.slice(4, 6));
+        console.log("month", month)
+        let nombre = parseInt(lastCode.slice(6));
+        let actuelMonth = new Date().getMonth() + 1;
+        console.log("actuel month", actuelMonth)
+        let year = new Date().getFullYear().toString().slice(2);
+        if (actuelMonth === month) {
+            nombre += 1;
+        } else {
+            nombre = 1;
+        }
+        let code = twoLetter + year + actuelMonth.toString().padStart(2, "0") + nombre.toString().padStart(2, "0");
+        // user.compte.code = code;
+        return code;
+    }
+    else {
+        let actuelMonth = new Date().getMonth() + 1;
+        console.log("actuel month", actuelMonth)
+        let year = new Date().getFullYear().toString().slice(2);
+        let nombre = 1;
+        let code = twoLetter + year + actuelMonth.toString().padStart(2, "0") + nombre.toString().padStart(2, "0");
+        // user.compte.code = code;
+        return code
+    }
+}
+

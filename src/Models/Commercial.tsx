@@ -3,8 +3,9 @@ import { Administrateur } from "./Administrateur";
 import { Chauffeur } from "./Chauffeur";
 import { Compte } from "./Compte";
 import { ChauffeurAttr, CommercialAttr } from "./type";
-import { db } from "../firebase";
+import { db, storage } from "../firebase";
 import { codePromo, hashPassword } from "../utils";
+import { ref, uploadBytes, } from "firebase/storage";
 
 const collectionCommercial = collection(db, "commercial") as CollectionReference<CommercialAttr>
 
@@ -26,6 +27,7 @@ export class Commercial extends Compte {
             const documents = snapshot.docs;
             return documents.map((value): Commercial => {
                 let data = value.data();
+                data.password="";
                 return new Commercial({ ...Commercial.dataClearCompte, ...data, id: value.id });
             })
         });
@@ -37,6 +39,7 @@ export class Commercial extends Compte {
             const documents = snapshot.docs;
             return documents.map((value): Commercial => {
                 let data = value.data();
+                data.password = "";
                 return new Commercial({...Commercial.dataClearCompte,...data, id:value.id});
             })
         });
@@ -64,24 +67,28 @@ export class Commercial extends Compte {
             if (dataFirebase.password === password.trim()) {
                 isExist = true;
                 commercial = new Commercial({ ...dataFirebase, id: doc.id});
+                commercial.compte.password=""
             }
             // if (checkPassword(password.trim(), dataFirebase.password)) {
             //     isExist = true;
             //     commercial = new Commercial({ ...dataFirebase, id: doc.id });
             // }
         })
+        
         return commercial;
     }
 
     async getChauffeurs():Promise<Chauffeur[]|null> {
         const collectionChauffeur = collection(db, "chauffeur") as CollectionReference<ChauffeurAttr>
-
-        const queryCollection = query(collectionChauffeur, where("commercial_id", "==", this.compte.id), orderBy("created_at", "desc"));
+        console.log("nouveau chauffers getchauffeur");
+        const queryCollection = query(collectionChauffeur, where("commercial_id", "==", this.compte.id));
         const dataDocs = await getDocs(queryCollection);
         var isExist = false;
         var chauffeurs: Chauffeur[] = [];
         dataDocs.forEach((doc) => {
-            let chauffeur = new Chauffeur({...Chauffeur.clearDataChauffeur ,...doc.data(), id: doc.id });
+            let data = doc.data();
+            data.password=""
+            let chauffeur = new Chauffeur({...Chauffeur.clearDataChauffeur ,...data, id: doc.id });
             chauffeurs.push(chauffeur)
         });
         return chauffeurs;
@@ -93,22 +100,61 @@ export class Commercial extends Compte {
         dataForm2.expiration_cni = Timestamp.fromDate(new Date(dataForm2.expiration_cni as string));
         const dataCommercial: CommercialAttr = { ...Commercial.dataClearCompte, ...dataForm2 };
         dataCommercial.created_at = Timestamp.fromDate(new Date());
-        var isSave = false;
-        let cni_verso = dataCommercial.cni_verso as FileList;
-        let cni_recto = dataCommercial.cni_recto as FileList;
+        // var isSave = false;
+        // let cni_verso = dataCommercial.cni_verso as FileList;
+        // let cni_recto = dataCommercial.cni_recto as FileList;
         let password = dataCommercial.password;
         dataCommercial.password = hashPassword(password);
-        dataCommercial.cni_recto = "cni_recto";
-        dataCommercial.cni_verso = "cni_verso";
+
         const commercial = new Commercial(dataCommercial);
         commercial.compte.administrateur_id = administrateur_id;
-        await codePromo(commercial)
+        let code = await codePromo(commercial);
+
+        for(let key in dataCommercial){
+            let k:keyof CommercialAttr = key as any;
+            let fileImage = dataCommercial[k];
+            if(fileImage instanceof FileList){
+                if(code){
+                    await Compte.saveImage({ file: fileImage, name: k, code: code, user: commercial })
+                }
+            }
+        }
+        // var cni_rectoRef = null;
+        // var cni_versoRef = null;
+        // if(cni_recto[0].type==="image/png"){
+        //     cni_rectoRef = ref(storage, "images/"+code+"/cni_recto.png");
+        // } else if (cni_recto[0].type === "image/jpeg"){
+        //     cni_rectoRef = ref(storage, "images/" + code + "/cni_recto.jpeg");
+        // } else if (cni_recto[0].type === "image/jpg") {
+        //     cni_rectoRef = ref(storage, "images/" + code + "/cni_recto.jpg");
+        // }
+        // console.log("cni_verso", cni_verso);
+        // console.log("cni_recto", cni_recto);
+
+
+        // if (cni_verso[0].type === "image/png") {
+        //     cni_versoRef = ref(storage, "images/" + code + "/cni_verso.png");
+        // } else if (cni_verso[0].type === "image/jpeg") {
+        //     cni_versoRef = ref(storage, "images/" + code + "/cni_verso.jpeg");
+        // } else if (cni_verso[0].type === "image/jpg") {
+        //     cni_versoRef = ref(storage, "images/" + code + "/cni_verso.jpg");
+        // }
+        // if(cni_rectoRef && cni_versoRef){
+        //     uploadBytes(cni_rectoRef, cni_recto[0]).then((snapshot) => {
+        //         console.log("telechargement cni_recto termniné")
+        //     })
+        //     uploadBytes(cni_versoRef, cni_verso[0]).then((snapshot) => {
+        //         console.log("telechargement cni_verso termniné")
+        //     })
+        // }
+
         console.log("avant sauvegarde=>", commercial);
         const sauvegarde = await addDoc(collectionCommercial, commercial.compte);
         if (sauvegarde.id) {
             console.log("cle id =>", sauvegarde.id);
             console.log("sauvegarde réussi");
             commercial.compte.id = sauvegarde.id;
+            commercial.compte.password=""
             return commercial;
         }
         return null

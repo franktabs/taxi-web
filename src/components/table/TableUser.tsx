@@ -17,7 +17,7 @@ import { KeyUseQuery } from "../../AllProvider";
 
 
 
-type User = Compte
+type User = Compte | Chauffeur | Commercial | Administrateur
 
 
 type Props = {
@@ -26,13 +26,17 @@ type Props = {
 
 
 
-export const excludeColumn: Array<keyof CompteAttr | keyof ChauffeurAttr> = ["position", "id", "administrateur_id", "commercial_id", "password", "cni_recto", "cni_verso"];
+export const excludeColumn: Array<keyof CompteAttr | keyof ChauffeurAttr> = ["position", "id", "administrateur_id", "commercial_id", "password", "cni_recto", "cni_verso", "immatriculation", "photo", "permi_conduire", "carte_grise", "assurance"];
+export const includeURLImage: Array<keyof CompteAttr | keyof ChauffeurAttr> = ["cni_recto", "cni_verso", "permi_conduire", "carte_grise", "immatriculation"] //____________________________________________________________travailler ici________________________________________________________________________________
+
 
 export type UserTableUser = User;
 export type PropsTableUser = 'chauffeurs' | 'commerciaux';
 
-const keyAllUsersTable: KeyUseQuery = "allUsersTable";
-const keyUsersTable: KeyUseQuery = "usersTable";
+export const keyAllUsersTable: KeyUseQuery = "allUsersTable";
+export const keyUsersTable: KeyUseQuery = "usersTable";
+
+
 export default function TableUser({ title = "chauffeurs" }: Props) {
 
     const queryClient = useQueryClient();
@@ -41,7 +45,7 @@ export default function TableUser({ title = "chauffeurs" }: Props) {
 
     const { userAuth } = useUserAuth();
 
-    const [allUsersTable, setAllUsersTable] = useState<Compte[] | null>(null);
+    // const [allUsersTable, setAllUsersTable] = useState<Compte[] | Chauffeur[] | Commercial[] | Administrateur[] | null>(null);
 
     const [enableQueryAllUsersTable, setEnableQueryAllUsersTable] = useState(false);
     const [enableQueryUsersTable, setEnableQueryUsersTable] = useState(false);
@@ -58,43 +62,55 @@ export default function TableUser({ title = "chauffeurs" }: Props) {
 
     const { handleSubmit, register, reset, formState } = useForm<ModelAttr>({ mode: "onSubmit" });
 
-    const [usersTable, setUsersTable] = useState<Compte[] | null>(null);
+    // const [usersTable, setUsersTable] = useState<Compte[] | null>(null);
     const [refresh, setRefresh] = useState({ val: false });
 
-    useQuery([keyUsersTable], () => {
+    const queryUsersTable = useQuery([keyUsersTable], async () => {
         if (userAuth.user instanceof Commercial) {
             let commercial = userAuth.user as Commercial;
-            commercial.getChauffeurs().then((chauffeurs) => {
-                setUsersTable(chauffeurs);
-                console.log("liste des chauffeurs ", chauffeurs);
-            });
+            let chauffeurs = await commercial.getChauffeurs();
+            setEnableQueryUsersTable(false);
+            return chauffeurs;
+        //     .then((chauffeurs) => {
+        //         // setUsersTable(chauffeurs);
+
+        //         console.log("liste des chauffeurs ", chauffeurs);
+        //     });
         }
         if (userAuth.user instanceof Administrateur) {
             if(title==="chauffeurs"){
-                Chauffeur.findAll().then((chauffeurs) => {
-                    setUsersTable(chauffeurs);
-                    console.log("liste des chauffeurs ", chauffeurs);
-                });
+                let chauffeur = await Chauffeur.findAll();
+                setEnableQueryUsersTable(false);
+                return chauffeur;
+                // .then((chauffeurs) => {
+                //     setUsersTable(chauffeurs);
+                //     console.log("liste des chauffeurs ", chauffeurs);
+                // });
             }else if(title==="commerciaux"){
                 console.log("recherche commerciaux");
-                Commercial.findAll().then((commerciaux) => {
-                    setUsersTable(commerciaux);
-                    console.log("liste des commerciaux ", commerciaux);
-                });
+                let commercial = await Commercial.findAll()
+                // .then((commerciaux) => {
+                //     setUsersTable(commerciaux);
+                //     console.log("liste des commerciaux ", commerciaux);
+                // });
+                setEnableQueryUsersTable(false);
+                return commercial;
             }
         }
-        setEnableQueryUsersTable(false);
     }, { enabled: enableQueryUsersTable });
 
-    useQuery([keyAllUsersTable], async () => {
+    const queryAllUsersTable = useQuery([keyAllUsersTable], async () => {
         if(title==="chauffeurs"){
             let chauffeurs = await Chauffeur.findAll();
-            setAllUsersTable(chauffeurs);
+            setEnableQueryAllUsersTable(false);
+            return chauffeurs
+            // setAllUsersTable(chauffeurs);
         }else if(title==="commerciaux"){
-            let chauffeurs = await Commercial.findAll();
-            setAllUsersTable(chauffeurs);
+            let commercials = await Commercial.findAll();
+            setEnableQueryAllUsersTable(false);
+            return commercials
+            // setAllUsersTable(chauffeurs);
         }
-        setEnableQueryAllUsersTable(false);
     }, { enabled: enableQueryAllUsersTable });
 
 
@@ -150,6 +166,10 @@ export default function TableUser({ title = "chauffeurs" }: Props) {
         }
         // event.preventDefault();
         console.log("title handleClick ", title);
+        $("#loaderDualRing").removeClass("d-none");
+        let loaderDualRing = document.querySelector(".loaderDualRing");
+        loaderDualRing?.classList.toggle("d-none");
+
         if (title === "chauffeurs") {
             if (userAuth.user instanceof Commercial) {
                 instanceUser = await Chauffeur.saveFirebase({ dataForm: data, commercial_id: userAuth.user.compte.id });
@@ -159,6 +179,8 @@ export default function TableUser({ title = "chauffeurs" }: Props) {
                 instanceUser = await Commercial.saveFirebase({ dataForm: data, administrateur_id: userAuth.user.compte.id });
             }
         }
+
+        // await new Promise((resolve, reject) => {return setTimeout(resolve, 5000)})
 
         if (instanceUser != null) {
 
@@ -182,6 +204,7 @@ export default function TableUser({ title = "chauffeurs" }: Props) {
                 title: 'Erreur inscription'
             })
         }
+        $("#loaderDualRing").addClass("d-none")
     }, [userAuth, title, setModal, queryClient, reset])
 
 
@@ -238,6 +261,8 @@ export default function TableUser({ title = "chauffeurs" }: Props) {
 
     const ligneHead = useMemo(() => {
         let tableTH;
+        let usersTable = queryUsersTable.data;
+        if(queryUsersTable.isLoading) return <div>Chargement...</div>
         if (usersTable) {
             let columnName = { ...usersTable[0]?.compte };
             excludeColumn.forEach((element) => {
@@ -247,22 +272,28 @@ export default function TableUser({ title = "chauffeurs" }: Props) {
 
                 return <th key={key + value + "ligneHead"} className=" text-uppercase" > {value} </th>
             })
+        }else{
+            return <div>Impossible de charger les données</div>
         }
         return tableTH;
-    }, [usersTable])
+    }, [queryUsersTable])
 
 
     const ligneBody = useMemo(() => {
         let tableTH;
+        let usersTable = queryUsersTable.data;
+        if (queryUsersTable.isLoading) return <div>Chargement...</div>
         if (usersTable) {
             tableTH = usersTable.map((value, key) => {
                 return (
                     <LigneTableUser user={value} key={"LigneBody" + value + key} title={title} setRefresh={setRefresh} />
                 )
             })
+        } else {
+            return <div>Impossible de charger les données</div>
         }
         return tableTH;
-    }, [usersTable, title])
+    }, [queryUsersTable, title])
 
     const btnBeforeTable = useMemo(() => {
         if (title === "commerciaux") {
@@ -276,7 +307,7 @@ export default function TableUser({ title = "chauffeurs" }: Props) {
             )
         }
         else if (title === "chauffeurs") {
-            if(userAuth instanceof Commercial){
+            if(userAuth.user instanceof Commercial || userAuth.user instanceof Administrateur){
                 return (
                     <div>
                         <div>
@@ -292,25 +323,36 @@ export default function TableUser({ title = "chauffeurs" }: Props) {
 
     }, [title, handleAjouter, userAuth]);
 
+    const isAllUsersTable = useCallback(()=>{
+        
+        if(queryAllUsersTable.isLoading){
+            $(".loaderDualRing").removeClass("d-none")
+        }else{
+            $(".loaderDualRing").addClass("d-none")
+        }
+        return queryAllUsersTable.isSuccess
+
+    },[queryAllUsersTable])
+
 
     const formUser = useMemo(() => {
         let errors = formState.errors
         if (instanceUser != null) {
-            if (instanceUser instanceof Chauffeur) {
+            if ((instanceUser instanceof Chauffeur) && isAllUsersTable() ) {
                 console.log("generation from chauffeur");
                 return <ContainerForm choiceUser="CHAUFFEUR" title="INSCRIPTION" handleSubmit={handleSubmit(handleSubmitModal)}>
                     {
-                        instanceUser.signInTextField({ register, errors, users: allUsersTable, setEnableQueryUsers: setEnableQueryAllUsersTable })
+                        instanceUser.signInTextField({ register, errors, users: queryAllUsersTable.data, setEnableQueryUsers: setEnableQueryAllUsersTable })
                     }
                     <div className=" text-center w-100" >
                         <Button variant="outlined" color="error" onClick={() => { $(".container-modal2").toggleClass("d-none"); reset() }} >Annuler</Button>
                     </div>
                 </ContainerForm>
-            }else if(instanceUser instanceof Commercial){
+            }else if((instanceUser instanceof Commercial )&& isAllUsersTable()){
                 console.log("generation from commercial");
                 return <ContainerForm choiceUser="COMMERCIAL" title="INSCRIPTION" handleSubmit={handleSubmit(handleSubmitModal)}>
                     {
-                        instanceUser.signInTextField({ register, errors, users: allUsersTable, setEnableQueryUsers: setEnableQueryAllUsersTable })
+                        instanceUser.signInTextField({ register, errors, users: queryAllUsersTable.data, setEnableQueryUsers: setEnableQueryAllUsersTable })
                     }
                     <div className=" text-center w-100" >
                         <Button variant="outlined" color="error" onClick={() => { $(".container-modal2").toggleClass("d-none"); reset() }} >Annuler</Button>
@@ -319,7 +361,7 @@ export default function TableUser({ title = "chauffeurs" }: Props) {
             }
         }
         return null
-    }, [instanceUser, handleSubmit, handleSubmitModal, reset, register, formState, allUsersTable])
+    }, [instanceUser, handleSubmit, handleSubmitModal, reset, register, formState, queryAllUsersTable, isAllUsersTable])
 
     console.log("render TableUser");
     return (

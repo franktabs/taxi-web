@@ -1,8 +1,8 @@
 
 import { BsFillPersonFill } from "react-icons/bs"
 import $ from "jquery"
-import { useCallback, ReactNode, useMemo, MouseEvent } from 'react';
-import { excludeColumn, PropsTableUser, UserTableUser } from "../../table/TableUser";
+import { useCallback, ReactNode, useMemo, MouseEvent, useState } from 'react';
+import { excludeColumn, includeURLImage, keyAllUsersTable, PropsTableUser, UserTableUser } from "../../table/TableUser";
 import { booleanString } from "../../../utils";
 import { doc, DocumentReference, Timestamp, updateDoc } from "firebase/firestore";
 import { useUserAuth } from "../../../context/UserAuthProviderContext";
@@ -10,8 +10,15 @@ import { Commercial, Compte } from "../../../Models";
 import { Administrateur } from '../../../Models/Administrateur';
 import { db } from "../../../firebase";
 import { Chauffeur } from '../../../Models/Chauffeur';
-import { ChauffeurAttr, CommercialAttr } from '../../../Models/type';
+import { ChauffeurAttr, CommercialAttr, ModelAttr } from '../../../Models/type';
 import Swal from "sweetalert2";
+import ModalDashboard from '../../modal/ModalDashboard';
+import { useForm } from 'react-hook-form';
+import ContainerForm from '../../../pages/autthentication/components/ContainerForm';
+import { Button } from '@mui/material';
+import { useQuery } from 'react-query';
+import { useQueryClient } from 'react-query';
+import DisplayImage from "../../img/DisplayImage";
 
 type Props = {
     user: UserTableUser,
@@ -20,14 +27,47 @@ type Props = {
     setRefresh?: React.Dispatch<React.SetStateAction<{ val: boolean }>>
 }
 
-const actionButton = ["Annuler", "ValiderChauffeur", "RefuserChauffeur", "AccesAuCommercial", "ModifierCommercial", "SuspendreCommercial"] as const
+const actionButton = ["Annuler", "ValiderChauffeur", "RefuserChauffeur", "AccesAuCommercial", "ModifierCommercial", "SuspendreCommercial", "ModifierChauffeur"] as const
 type ElmtActionButton = typeof actionButton[number]
 
 export default function CardFormUser({ user, title, isNew = false, setRefresh }: Props) {
 
+    const queryClient = useQueryClient();
+
     type KeyUser = keyof (typeof user.compte);
 
-    const { userAuth } = useUserAuth()
+    const { userAuth } = useUserAuth();
+
+    const [allUsersTable, setAllUsersTable] = useState<Compte[] | null>(null);
+    const [enableQueryAllUsersTable, setEnableQueryAllUsersTable] = useState(false);
+
+    
+    const defaultValuesForm = useMemo(() => {
+        let compte = { ...user.compte };
+        for (let key in compte) {
+            let k: keyof (typeof compte) = key as any
+            let timestamp = compte[k];
+
+
+            if (timestamp instanceof Timestamp) {
+                let date = timestamp.toDate() as any
+                var year = date.getFullYear();
+                var month = ("0" + (date.getMonth() + 1)).slice(-2);
+                var day = ("0" + date.getDate()).slice(-2);
+                var formattedDate = year + "-" + month + "-" + day;
+                //@ts-ignore
+                compte[k] = formattedDate
+
+            }
+
+        }
+        console.log("defaultVaaaaaaalue", compte);
+        return compte;
+
+    }, [user])
+
+    const { register, handleSubmit, reset, formState } = useForm<ModelAttr>({ defaultValues: defaultValuesForm })
+
 
     const handleClick = useCallback((action: ElmtActionButton) => {
         const Toast = Swal.mixin({
@@ -87,7 +127,10 @@ export default function CardFormUser({ user, title, isNew = false, setRefresh }:
                 }
             },
             "ModifierCommercial": () => {
-                $(".container-modal").toggleClass("d-none")
+                $(".container-modal3").toggleClass("d-none")
+            },
+            "ModifierChauffeur": ()=>{
+                $(".container-modal3").toggleClass("d-none")
             },
             "SuspendreCommercial": async () => {
                 if (!!userDocRef) {
@@ -119,6 +162,89 @@ export default function CardFormUser({ user, title, isNew = false, setRefresh }:
         return handleAction[action]
     }, [title, setRefresh, user]);
 
+    useQuery([keyAllUsersTable], async () => {
+        if (title === "chauffeurs") {
+            let chauffeurs = await Chauffeur.findAll();
+            setAllUsersTable(chauffeurs);
+        } else if (title === "commerciaux") {
+            let chauffeurs = await Commercial.findAll();
+            setAllUsersTable(chauffeurs);
+        }
+        setEnableQueryAllUsersTable(false);
+    }, { enabled: enableQueryAllUsersTable });
+
+
+    // const handleSubmitModal = useCallback(async (data: any) => {
+
+    //     const Toast = Swal.mixin({
+    //         toast: true,
+    //         position: 'top-end',
+    //         showConfirmButton: false,
+    //         timer: 3000,
+    //         timerProgressBar: true,
+    //         didOpen: (toast) => {
+    //             toast.addEventListener('mouseenter', Swal.stopTimer)
+    //             toast.addEventListener('mouseleave', Swal.resumeTimer)
+    //         }
+    //     })
+
+    //     // const formdata = new FormData(document.getElementById("formLogin") as HTMLFormElement);
+    //     // const data = Object.fromEntries(formdata.entries())
+    //     console.log("data du form", data);
+    //     let instanceUser: Compte | null = null;
+    //     let isEmpty = false;
+    //     Object.values(data).forEach((val, key) => {
+    //         if (!val) {
+    //             isEmpty = true;
+    //         }
+    //     });
+
+    //     if (isEmpty) {
+    //         Toast.fire({
+    //             icon: "error",
+    //             title: 'Tous les champs sont obligatoire'
+    //         })
+    //         return
+    //     }
+    //     // event.preventDefault();
+    //     console.log("title handleClick ", title);
+    //     if (title === "chauffeurs") {
+    //         if (userAuth.user instanceof Commercial) {
+    //             instanceUser = await Chauffeur.saveFirebase({ dataForm: data, commercial_id: userAuth.user.compte.id });
+    //         }
+    //     } else if (title === "commerciaux") {
+    //         if (userAuth.user instanceof Administrateur) {
+    //             instanceUser = await Commercial.saveFirebase({ dataForm: data, administrateur_id: userAuth.user.compte.id });
+    //         }
+    //     }
+
+    //     if (instanceUser != null) {
+
+    //         queryClient.invalidateQueries([keyAllUsersTable]);
+    //         // setRefresh({ val: true })
+    //         $(".container-modal3").toggleClass("d-none")
+    //         // setModal({ value: <div></div> })
+    //         reset()
+    //         Toast.fire({
+    //             icon: "success",
+    //             title: 'inscription réussi'
+    //         })
+
+    //     } else {
+    //         console.log("inscription échoué");
+
+
+    //         Toast.fire({
+    //             icon: "error",
+    //             title: 'Erreur inscription'
+    //         })
+    //     }
+    // }, [userAuth, title, queryClient, reset])
+
+    const handleSubmitModal = useCallback((data:any)=>{
+        $(".container-modal3").toggleClass("d-none")
+    }, [])
+
     const ligneBody = useMemo(() => {
         let ligneValue = { ...user.compte }
         excludeColumn.forEach((elm) => {
@@ -145,7 +271,7 @@ export default function CardFormUser({ user, title, isNew = false, setRefresh }:
             //         tdInput = <input className=" form-control" type="text" name={value} value={ligneValue[value] as any || ""} placeholder={value.toUpperCase()} />
             //     }
             // } 
-            if(title==="commerciaux" || title ==="chauffeurs") {
+            if (title === "commerciaux" || title === "chauffeurs") {
                 if (ligneValue[value] instanceof Timestamp) {
                     let timestamp = ligneValue[value] as Timestamp;
                     tdInput = timestamp?.toDate().toLocaleDateString();
@@ -176,12 +302,6 @@ export default function CardFormUser({ user, title, isNew = false, setRefresh }:
             var userCompte = user as Chauffeur
             console.log("open chauffeur form", userAuth);
             if (userAuth.user instanceof Commercial) {
-                group = <>
-                    {/* <button className=" btn btn-primary" onClick={handleClick} > Modifier </button> */}
-                    <button className=" btn btn-dark" onClick={handleClick("Annuler")}> Annuler </button>
-                </>
-            } else if (userAuth.user instanceof Administrateur) {
-
                 if (userCompte.compte.treated && userCompte.compte.access) {
                     group = <>
                         <button className=" btn btn-danger" onClick={handleClick("RefuserChauffeur")} > Suspendre </button>
@@ -192,14 +312,34 @@ export default function CardFormUser({ user, title, isNew = false, setRefresh }:
                         <button className=" btn btn-success" onClick={handleClick("ValiderChauffeur")} > Donner Accès </button>
                         <button className=" btn btn-dark" onClick={handleClick("Annuler")}> Annuler </button>
                     </>
-                } else if (!userCompte.compte.treated) {
+                }else{
                     group = <>
+                        <button className=" btn btn-dark" onClick={handleClick("Annuler")}> Annuler </button>
+                    </>
+                }
+            } else if (userAuth.user instanceof Administrateur) {
+                let subgroup = null;
+                if (userCompte.compte.treated && userCompte.compte.access) {
+                    subgroup = <>
+                        <button className=" btn btn-danger" onClick={handleClick("RefuserChauffeur")} > Suspendre </button>
+                        <button className=" btn btn-dark" onClick={handleClick("Annuler")}> Annuler </button>
+                    </>
+                } else if (userCompte.compte.treated && !userCompte.compte.access) {
+                    subgroup = <>
+                        <button className=" btn btn-success" onClick={handleClick("ValiderChauffeur")} > Donner Accès </button>
+                        <button className=" btn btn-dark" onClick={handleClick("Annuler")}> Annuler </button>
+                    </>
+                } else if (!userCompte.compte.treated) {
+                    subgroup = <>
                         <button className=" btn btn-success" onClick={handleClick("ValiderChauffeur")} > Valider </button>
                         <button className=" btn btn-danger" onClick={handleClick("RefuserChauffeur")} > Refuser </button>
                         <button className=" btn btn-dark" onClick={handleClick("Annuler")}> Annuler </button>
                     </>
                 }
-
+                group = <>
+                    <button className=" btn btn-primary" onClick={handleClick("ModifierChauffeur")} > Modifier </button>
+                    {subgroup}
+                </>
             }
         } else if (title === "commerciaux") {
             group = <>
@@ -218,9 +358,69 @@ export default function CardFormUser({ user, title, isNew = false, setRefresh }:
         return group;
     }, [title, handleClick, userAuth, user])
 
+    const formUser = useMemo(() => {
+        let errors = formState.errors
+        if (user != null) {
+            if (user instanceof Chauffeur) {
+                console.log("generation from chauffeur");
+                return <ContainerForm choiceUser="CHAUFFEUR" title="MODIFICATION" handleSubmit={handleSubmit(handleSubmitModal)}>
+                    {
+                        user.signInTextField({ register, errors, users: allUsersTable, setEnableQueryUsers: setEnableQueryAllUsersTable })
+                    }
+                    <div className=" text-center w-100" >
+                        <Button variant="outlined" color="error" onClick={() => { $(".container-modal3").toggleClass("d-none"); reset() }} >Annuler</Button>
+                    </div>
+                </ContainerForm>
+            } else if (user instanceof Commercial) {
+                console.log("generation from commercial");
+                return <ContainerForm choiceUser="COMMERCIAL" title="MODIFICATION" handleSubmit={handleSubmit(handleSubmitModal)}>
+                    {
+                        user.signInTextField({ register, errors, users: allUsersTable, setEnableQueryUsers: setEnableQueryAllUsersTable })
+                    }
+                    <div className=" text-center w-100" >
+                        <Button variant="outlined" color="error" onClick={() => { $(".container-modal3").toggleClass("d-none"); reset() }} >Annuler</Button>
+                    </div>
+                </ContainerForm>
+            }
+        }
+        return null
+    }, [handleSubmit, handleSubmitModal, reset, register, formState, allUsersTable, user])
+
+    const lineImages = useMemo(() => {
+        let tab_tr = [];
+        let k = 0
+        for (let attr of includeURLImage) {
+
+            if (attr !== "cni_recto" && attr !== "cni_verso") {
+
+                if (Object.keys(user.compte).includes(attr)) {
+                    tab_tr.push(
+                        <tr key={("lineImagesCardFormUser"+attr+(++k))} >
+                            <th className=" text-uppercase fw-bold" >{attr} </th>
+                            <td>
+                                <div className=" d-flex gap-2 justify-content-center" >
+                                    <DisplayImage user={user} url={
+                                        //@ts-ignore
+                                        user.compte[attr] as string
+                                        
+                                        } name={attr} alt={attr} />
+                                </div>
+                            </td>
+
+                        </tr>
+                    )
+                }
+            }
+
+        }
+        return tab_tr;
+    }, [ user])
+
     return (
         <div className=" bg-white"  >
-
+            <ModalDashboard id="container-modal3">
+                {formUser}
+            </ModalDashboard>
             <div className=" position-relative" >
                 <p style={{ marginLeft: "20px" }} className=" position-absolute bg-dark text-light p-3 d-inline-block rounded-3 translate-middle-y"  >
                     <span>
@@ -243,17 +443,16 @@ export default function CardFormUser({ user, title, isNew = false, setRefresh }:
                         <tr>
                             <th>CNI</th>
                             <td>
-                                <div className=" d-flex gap-2">
-                                    <div style={{ width: "100px", height: "100px" }} className=" bg-dark d-flex align-items-center justify-content-center" >
-                                        <p style={{ margin: 0 }} className=" text-white" >IMG</p>
-                                    </div>
-                                    <div style={{ width: "100px", height: "100px" }} className=" bg-dark d-flex align-items-center justify-content-center" >
-                                        <p style={{ margin: 0 }} className=" text-white" >IMG</p>
-                                    </div>
+                                <div className=" d-flex gap-2" >
+                                    <DisplayImage user={user} url={user.compte.cni_recto as string} name="cni_recto" alt="cni_recto" />
+                                    <DisplayImage user={user} url={user.compte.cni_verso as string} name="cni_verso" alt="cni_verso" />
                                 </div>
                             </td>
 
                         </tr>
+                        {
+                            lineImages
+                        }
 
                     </tbody>
                 </table>

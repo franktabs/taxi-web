@@ -26,7 +26,7 @@ export default firebaseConfig;
 const analytics = getAnalytics(app);
 
 export const db = getFirestore(app);
-export const storage = getStorage(app);
+export const storage = getStorage(app,"gs://analog-antler-380217.appspot.com/");
 
 
 
