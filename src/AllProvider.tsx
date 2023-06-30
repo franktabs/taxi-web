@@ -23,7 +23,6 @@ export default function AllProvider({ children }: Props) {
 
         </ModalProviderContext>
       </UserAuthProviderContext>
-      <ReactQueryDevtools />
     </QueryClientProvider>
 
   )

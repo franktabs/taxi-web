@@ -22,9 +22,9 @@ interface Props extends PropsDataUser {
 
 const Container = styled.div`
     height: 150px;
-    max-width: 390px;
+    max-width: 95%;
     cursor: pointer;
-    min-width: 380px;
+    min-width: 300px;
 `
 
 

@@ -7,7 +7,7 @@ import IconFloatUser from "../../components/icons/userSingle/IconFloatUser";
 import { useModal } from "../../context/ModalProviderContext";
 import ModalDashboard from "../../components/modal/ModalDashboard";
 import TableUser, { PropsTableUser } from "../../components/table/TableUser";
-import { useLocation } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useUserAuth } from "../../context/UserAuthProviderContext";
 import { Administrateur, Commercial } from "../../Models";
 
@@ -39,7 +39,7 @@ abstract class TableViewUser {
 
     public renderView(title:PropsTableUser = "chauffeurs"):JSX.Element{
         return (
-            <div className="mt-5" style={{ maxWidth: "90%" }}>
+            <div className="mt-5 " style={{ maxWidth:"100%" }}>
                 <TableUser title={title} />
             </div> 
         )
@@ -63,6 +63,7 @@ class CommercialTable extends TableViewUser{
 const Utilisateurs: FunctionComponent = () => {
     const { modal } = useModal();
     const {userAuth} = useUserAuth();
+    const navigate = useNavigate();
 
 
     const [viewTable, setViewTable] = useState<TableViewUser | null>(null)
@@ -76,9 +77,14 @@ const Utilisateurs: FunctionComponent = () => {
 
     const handleClick = useCallback((event: MouseEvent) => {
         setViewTable(new ChauffeurTable());
+        let idTableUser = document.getElementById("tableUser")
+        idTableUser?.scrollIntoView(true)
     }, []);
     const handleClick2 = useCallback((event: MouseEvent) => {
         setViewTable(new CommercialTable());
+        let idTableUser = document.getElementById("tableUser")
+        idTableUser?.scrollIntoView({ behavior: "smooth" })
+
     }, []);
 
     useEffect(()=>{
@@ -110,12 +116,12 @@ const Utilisateurs: FunctionComponent = () => {
     }, [dataCartChauffeur, dataCartCommercial, handleClick, handleClick2, userAuth])
 
     return (
-        <div >
+        <div className=" d-flex flex-column mx-1 mx-sm-3" >
             <ModalDashboard id="container-modal">
                 {modal.value}
             </ModalDashboard>
 
-            <div className=" d-flex flex-wrap gap-3" >
+            <div className=" d-flex flex-wrap gap-5 justify-content-center justify-content-md-start" id="tableUser" >
                 {card}
 
             </div>

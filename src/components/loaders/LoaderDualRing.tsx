@@ -37,17 +37,17 @@ let ContentLoader = styled.div`
     top: 0;
     left: 0;
     min-height: 100vh;
-    display: flex;
     justify-content: center;
     align-items: center;
     background-color: #00000081;
     z-index: 99;
+    display: none;
 `
 
 
 const LoaderDualRing = React.memo(()=>{
     return (
-        <ContentLoader className="loaderDualRing d-none" id="loaderDualRing" >
+        <ContentLoader className="loaderDualRing" id="loaderDualRing" >
             <Loader />
         </ContentLoader>
     )

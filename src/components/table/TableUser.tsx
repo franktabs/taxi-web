@@ -70,7 +70,11 @@ export default function TableUser({ title = "chauffeurs" }: Props) {
             let commercial = userAuth.user as Commercial;
             let chauffeurs = await commercial.getChauffeurs();
             setEnableQueryUsersTable(false);
-            return chauffeurs;
+            if(chauffeurs && chauffeurs[0]){
+                return chauffeurs
+            }else{
+                throw new Error("Impossible de charger les données")
+            }
         //     .then((chauffeurs) => {
         //         // setUsersTable(chauffeurs);
 
@@ -81,7 +85,12 @@ export default function TableUser({ title = "chauffeurs" }: Props) {
             if(title==="chauffeurs"){
                 let chauffeur = await Chauffeur.findAll();
                 setEnableQueryUsersTable(false);
-                return chauffeur;
+                if (chauffeur && chauffeur[0]) {
+                    return chauffeur
+                } else {
+                    throw new Error("Impossible de charger les données")
+                }
+
                 // .then((chauffeurs) => {
                 //     setUsersTable(chauffeurs);
                 //     console.log("liste des chauffeurs ", chauffeurs);
@@ -94,21 +103,41 @@ export default function TableUser({ title = "chauffeurs" }: Props) {
                 //     console.log("liste des commerciaux ", commerciaux);
                 // });
                 setEnableQueryUsersTable(false);
-                return commercial;
+                if (commercial && commercial[0]) {
+                    return commercial
+                } else {
+                    throw new Error("Impossible de charger les données")
+                }
             }
         }
     }, { enabled: enableQueryUsersTable });
 
     const queryAllUsersTable = useQuery([keyAllUsersTable], async () => {
         if(title==="chauffeurs"){
+            $(".loaderDualRing").attr("style", "display:flex")
+
             let chauffeurs = await Chauffeur.findAll();
             setEnableQueryAllUsersTable(false);
-            return chauffeurs
+            $(".loaderDualRing").attr("style", "display:none")
+
+            if (chauffeurs && chauffeurs[0]) {
+                return chauffeurs
+            } else {
+                throw new Error("Impossible de charger les données")
+            }
             // setAllUsersTable(chauffeurs);
         }else if(title==="commerciaux"){
+            $(".loaderDualRing").attr("style", "display:flex")
+
             let commercials = await Commercial.findAll();
             setEnableQueryAllUsersTable(false);
-            return commercials
+            $(".loaderDualRing").attr("style", "display:none")
+
+            if (commercials && commercials[0]) {
+                return commercials
+            } else {
+                throw new Error("Impossible de charger les données")
+            }
             // setAllUsersTable(chauffeurs);
         }
     }, { enabled: enableQueryAllUsersTable });
@@ -136,7 +165,7 @@ export default function TableUser({ title = "chauffeurs" }: Props) {
 
         const Toast = Swal.mixin({
             toast: true,
-            position: 'top-end',
+            position: "center",
             showConfirmButton: false,
             timer: 3000,
             timerProgressBar: true,
@@ -165,10 +194,13 @@ export default function TableUser({ title = "chauffeurs" }: Props) {
             return
         }
         // event.preventDefault();
+        
         console.log("title handleClick ", title);
-        $("#loaderDualRing").removeClass("d-none");
-        let loaderDualRing = document.querySelector(".loaderDualRing");
-        loaderDualRing?.classList.toggle("d-none");
+        $(".loaderDualRing").attr("style", "display:flex")
+
+        // $("#loaderDualRing").removeClass("d-none");
+        // let loaderDualRing = document.querySelector(".loaderDualRing");
+        // loaderDualRing?.classList.toggle("d-none");
 
         if (title === "chauffeurs") {
             if (userAuth.user instanceof Commercial) {
@@ -180,7 +212,7 @@ export default function TableUser({ title = "chauffeurs" }: Props) {
             }
         }
 
-        // await new Promise((resolve, reject) => {return setTimeout(resolve, 5000)})
+        await new Promise((resolve, reject) => {return setTimeout(resolve, 5000)})
 
         if (instanceUser != null) {
 
@@ -204,7 +236,7 @@ export default function TableUser({ title = "chauffeurs" }: Props) {
                 title: 'Erreur inscription'
             })
         }
-        $("#loaderDualRing").addClass("d-none")
+        $(".loaderDualRing").attr("style", "display:none")
     }, [userAuth, title, setModal, queryClient, reset])
 
 
@@ -283,15 +315,17 @@ export default function TableUser({ title = "chauffeurs" }: Props) {
         let tableTH;
         let usersTable = queryUsersTable.data;
         if (queryUsersTable.isLoading) return <div>Chargement...</div>
-        if (usersTable) {
+        if (usersTable && usersTable[0]) {
             tableTH = usersTable.map((value, key) => {
                 return (
                     <LigneTableUser user={value} key={"LigneBody" + value + key} title={title} setRefresh={setRefresh} />
                 )
             })
-        } else {
+        } else if(!queryUsersTable.isSuccess) {
             return <div>Impossible de charger les données</div>
         }
+
+
         return tableTH;
     }, [queryUsersTable, title])
 
@@ -323,22 +357,12 @@ export default function TableUser({ title = "chauffeurs" }: Props) {
 
     }, [title, handleAjouter, userAuth]);
 
-    const isAllUsersTable = useCallback(()=>{
-        
-        if(queryAllUsersTable.isLoading){
-            $(".loaderDualRing").removeClass("d-none")
-        }else{
-            $(".loaderDualRing").addClass("d-none")
-        }
-        return queryAllUsersTable.isSuccess
-
-    },[queryAllUsersTable])
 
 
     const formUser = useMemo(() => {
         let errors = formState.errors
         if (instanceUser != null) {
-            if ((instanceUser instanceof Chauffeur) && isAllUsersTable() ) {
+            if ((instanceUser instanceof Chauffeur) && queryAllUsersTable.isSuccess ) {
                 console.log("generation from chauffeur");
                 return <ContainerForm choiceUser="CHAUFFEUR" title="INSCRIPTION" handleSubmit={handleSubmit(handleSubmitModal)}>
                     {
@@ -348,7 +372,7 @@ export default function TableUser({ title = "chauffeurs" }: Props) {
                         <Button variant="outlined" color="error" onClick={() => { $(".container-modal2").toggleClass("d-none"); reset() }} >Annuler</Button>
                     </div>
                 </ContainerForm>
-            }else if((instanceUser instanceof Commercial )&& isAllUsersTable()){
+            }else if((instanceUser instanceof Commercial )&& queryAllUsersTable.isSuccess){
                 console.log("generation from commercial");
                 return <ContainerForm choiceUser="COMMERCIAL" title="INSCRIPTION" handleSubmit={handleSubmit(handleSubmitModal)}>
                     {
@@ -361,11 +385,11 @@ export default function TableUser({ title = "chauffeurs" }: Props) {
             }
         }
         return null
-    }, [instanceUser, handleSubmit, handleSubmitModal, reset, register, formState, queryAllUsersTable, isAllUsersTable])
+    }, [instanceUser, handleSubmit, handleSubmitModal, reset, register, formState, queryAllUsersTable])
 
     console.log("render TableUser");
     return (
-        <div className=" bg-white p-3 shadow-lg" >
+        <div className=" bg-white p-3 shadow-lg border-1 border border-light" >
             <ModalDashboard id="container-modal2">
                 {formUser}
             </ModalDashboard>

@@ -19,23 +19,26 @@ import { Button } from '@mui/material';
 import { useQuery } from 'react-query';
 import { useQueryClient } from 'react-query';
 import DisplayImage from "../../img/DisplayImage";
+import { stat } from "fs";
 
 type Props = {
     user: UserTableUser,
     title: PropsTableUser,
     isNew?: boolean,
     setRefresh?: React.Dispatch<React.SetStateAction<{ val: boolean }>>
+    modal?:boolean
 }
 
 const actionButton = ["Annuler", "ValiderChauffeur", "RefuserChauffeur", "AccesAuCommercial", "ModifierCommercial", "SuspendreCommercial", "ModifierChauffeur"] as const
 type ElmtActionButton = typeof actionButton[number]
 
-export default function CardFormUser({ user, title, isNew = false, setRefresh }: Props) {
+export default function CardFormUser({ user, title, isNew = false, setRefresh, modal=true }: Props) {
 
     const queryClient = useQueryClient();
 
     type KeyUser = keyof (typeof user.compte);
 
+    const [ userModal, setUserModal] = useState(user)
     const { userAuth } = useUserAuth();
 
     const [allUsersTable, setAllUsersTable] = useState<Compte[] | null>(null);
@@ -103,7 +106,11 @@ export default function CardFormUser({ user, title, isNew = false, setRefresh }:
                     console.log("updateUser", updateUser);
                     if (setRefresh) setRefresh({ val: true })
                     $(".container-modal").toggleClass("d-none")
-
+                    setUserModal(state => {
+                        let ancienstate = state;
+                        ancienstate.compte = {...state.compte,...dataUpdate}
+                        return ancienstate
+                    });
                     Toast.fire({
                         icon: "success",
                         title: 'Action réussi'
@@ -119,7 +126,11 @@ export default function CardFormUser({ user, title, isNew = false, setRefresh }:
                     console.log("updateUser", updateUser);
                     if (setRefresh) setRefresh({ val: true })
                     $(".container-modal").toggleClass("d-none")
-
+                    setUserModal(state => {
+                        let ancienstate = state;
+                        ancienstate.compte = { ...state.compte, ...dataUpdate }
+                        return ancienstate
+                    });
                     Toast.fire({
                         icon: "success",
                         title: 'Action réussi'
@@ -139,6 +150,11 @@ export default function CardFormUser({ user, title, isNew = false, setRefresh }:
                     console.log(dataUpdate);
                     const updateUser = await updateDoc(userDocRef, dataUpdate)
                     console.log("updateUser", updateUser);
+                    setUserModal(state => {
+                        let ancienstate = state;
+                        ancienstate.compte = { ...state.compte, ...dataUpdate }
+                        return ancienstate
+                    });
                     if (setRefresh) setRefresh({ val: true })
                     $(".container-modal").toggleClass("d-none")
 
@@ -151,6 +167,11 @@ export default function CardFormUser({ user, title, isNew = false, setRefresh }:
                     console.log(dataUpdate);
                     const updateUser = await updateDoc(userDocRef, dataUpdate)
                     console.log("updateUser", updateUser);
+                    setUserModal(state => {
+                        let ancienstate = state;
+                        ancienstate.compte = { ...state.compte, ...dataUpdate }
+                        return ancienstate
+                    });
                     if (setRefresh) setRefresh({ val: true });
                     $(".container-modal").toggleClass("d-none")
 
@@ -246,7 +267,7 @@ export default function CardFormUser({ user, title, isNew = false, setRefresh }:
     }, [])
 
     const ligneBody = useMemo(() => {
-        let ligneValue = { ...user.compte }
+        let ligneValue = { ...userModal.compte }
         excludeColumn.forEach((elm) => {
             delete ligneValue[elm as (keyof (typeof ligneValue))];
         })
@@ -294,59 +315,78 @@ export default function CardFormUser({ user, title, isNew = false, setRefresh }:
 
 
 
-    }, [title, user]);
+    }, [title, userModal]);
 
     const groupButton = useMemo(() => {
         let group = null
         if (title === "chauffeurs") {
-            var userCompte = user as Chauffeur
+            var userCompte = userModal as Chauffeur
             console.log("open chauffeur form", userAuth);
             if (userAuth.user instanceof Commercial) {
+                let subgroup = null
                 if (userCompte.compte.treated && userCompte.compte.access) {
-                    group = <>
+                    subgroup = <>
                         <button className=" btn btn-danger" onClick={handleClick("RefuserChauffeur")} > Suspendre </button>
-                        <button className=" btn btn-dark" onClick={handleClick("Annuler")}> Annuler </button>
+                        
                     </>
                 } else if (userCompte.compte.treated && !userCompte.compte.access) {
-                    group = <>
+                    subgroup = <>
                         <button className=" btn btn-success" onClick={handleClick("ValiderChauffeur")} > Donner Accès </button>
-                        <button className=" btn btn-dark" onClick={handleClick("Annuler")}> Annuler </button>
+                        
                     </>
                 }else{
+                    subgroup = <>
+                        
+                    </>
+                }
+                if(modal){
                     group = <>
+                        {subgroup}
                         <button className=" btn btn-dark" onClick={handleClick("Annuler")}> Annuler </button>
                     </>
+                }
+                else{
+                    group = subgroup;
                 }
             } else if (userAuth.user instanceof Administrateur) {
                 let subgroup = null;
                 if (userCompte.compte.treated && userCompte.compte.access) {
                     subgroup = <>
                         <button className=" btn btn-danger" onClick={handleClick("RefuserChauffeur")} > Suspendre </button>
-                        <button className=" btn btn-dark" onClick={handleClick("Annuler")}> Annuler </button>
+                        
                     </>
                 } else if (userCompte.compte.treated && !userCompte.compte.access) {
                     subgroup = <>
                         <button className=" btn btn-success" onClick={handleClick("ValiderChauffeur")} > Donner Accès </button>
-                        <button className=" btn btn-dark" onClick={handleClick("Annuler")}> Annuler </button>
+                        
                     </>
                 } else if (!userCompte.compte.treated) {
                     subgroup = <>
                         <button className=" btn btn-success" onClick={handleClick("ValiderChauffeur")} > Valider </button>
                         <button className=" btn btn-danger" onClick={handleClick("RefuserChauffeur")} > Refuser </button>
-                        <button className=" btn btn-dark" onClick={handleClick("Annuler")}> Annuler </button>
+                        
                     </>
                 }
-                group = <>
+                subgroup = <>
                     <button className=" btn btn-primary" onClick={handleClick("ModifierChauffeur")} > Modifier </button>
                     {subgroup}
                 </>
+                if (modal) {
+                    group = <>
+                        {subgroup}
+                        <button className=" btn btn-dark" onClick={handleClick("Annuler")}> Annuler </button>
+                    </>
+                }
+                else {
+                    group = subgroup;
+                }
             }
         } else if (title === "commerciaux") {
             group = <>
                 <button className=" btn btn-primary" onClick={handleClick("ModifierCommercial")} > Modifier </button>
                 {
 
-                    user.compte.access ?
+                    userModal.compte.access ?
                         <button className=" btn btn-danger" onClick={handleClick("SuspendreCommercial")} > Suspendre </button>
                         :
                         <button className=" btn btn-success" onClick={handleClick("AccesAuCommercial")} > Donner Accès </button>
@@ -356,26 +396,26 @@ export default function CardFormUser({ user, title, isNew = false, setRefresh }:
             </>
         }
         return group;
-    }, [title, handleClick, userAuth, user])
+    }, [title, handleClick, userAuth, userModal, modal])
 
     const formUser = useMemo(() => {
         let errors = formState.errors
-        if (user != null) {
-            if (user instanceof Chauffeur) {
+        if (userModal != null) {
+            if (userModal instanceof Chauffeur) {
                 console.log("generation from chauffeur");
                 return <ContainerForm choiceUser="CHAUFFEUR" title="MODIFICATION" handleSubmit={handleSubmit(handleSubmitModal)}>
                     {
-                        user.signInTextField({ register, errors, users: allUsersTable, setEnableQueryUsers: setEnableQueryAllUsersTable })
+                        userModal.signInTextField({ register, errors, users: allUsersTable, setEnableQueryUsers: setEnableQueryAllUsersTable })
                     }
                     <div className=" text-center w-100" >
                         <Button variant="outlined" color="error" onClick={() => { $(".container-modal3").toggleClass("d-none"); reset() }} >Annuler</Button>
                     </div>
                 </ContainerForm>
-            } else if (user instanceof Commercial) {
+            } else if (userModal instanceof Commercial) {
                 console.log("generation from commercial");
                 return <ContainerForm choiceUser="COMMERCIAL" title="MODIFICATION" handleSubmit={handleSubmit(handleSubmitModal)}>
                     {
-                        user.signInTextField({ register, errors, users: allUsersTable, setEnableQueryUsers: setEnableQueryAllUsersTable })
+                        userModal.signInTextField({ register, errors, users: allUsersTable, setEnableQueryUsers: setEnableQueryAllUsersTable })
                     }
                     <div className=" text-center w-100" >
                         <Button variant="outlined" color="error" onClick={() => { $(".container-modal3").toggleClass("d-none"); reset() }} >Annuler</Button>
@@ -384,7 +424,7 @@ export default function CardFormUser({ user, title, isNew = false, setRefresh }:
             }
         }
         return null
-    }, [handleSubmit, handleSubmitModal, reset, register, formState, allUsersTable, user])
+    }, [handleSubmit, handleSubmitModal, reset, register, formState, allUsersTable, userModal])
 
     const lineImages = useMemo(() => {
         let tab_tr = [];
@@ -393,15 +433,15 @@ export default function CardFormUser({ user, title, isNew = false, setRefresh }:
 
             if (attr !== "cni_recto" && attr !== "cni_verso") {
 
-                if (Object.keys(user.compte).includes(attr)) {
+                if (Object.keys(userModal.compte).includes(attr)) {
                     tab_tr.push(
                         <tr key={("lineImagesCardFormUser"+attr+(++k))} >
                             <th className=" text-uppercase fw-bold" >{attr} </th>
                             <td>
                                 <div className=" d-flex gap-2 justify-content-center" >
-                                    <DisplayImage user={user} url={
+                                    <DisplayImage user={userModal} url={
                                         //@ts-ignore
-                                        user.compte[attr] as string
+                                        userModal.compte[attr] as string
                                         
                                         } name={attr} alt={attr} />
                                 </div>
@@ -414,10 +454,10 @@ export default function CardFormUser({ user, title, isNew = false, setRefresh }:
 
         }
         return tab_tr;
-    }, [ user])
+    }, [ userModal])
 
     return (
-        <div className=" bg-white"  >
+        <div className=" bg-white rounded-3 shadow-lg" style={{ maxWidth:"95%" }}  >
             <ModalDashboard id="container-modal3">
                 {formUser}
             </ModalDashboard>
@@ -459,7 +499,7 @@ export default function CardFormUser({ user, title, isNew = false, setRefresh }:
             </div>
 
             <div className="p-4 border-top border-2 border-dark">
-                <div className=" d-flex gap-2 justify-content-end" >
+                <div className=" d-flex gap-2 justify-content-end fs-6" >
                     {
                         // title === "chauffeurs" ? <>
                         //     <button className=" btn btn-primary" onClick={handleClick} > Valider </button>

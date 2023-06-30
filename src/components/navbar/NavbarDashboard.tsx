@@ -34,8 +34,7 @@ const ListNav = styled.ul`
 export default function NavbarDashboard() {
   return (
       <div
-          className="h-100 rounded-3 text-white p-2 "
-          style={{ backgroundColor: "#3c3c43" }}
+          className="h-100 rounded-3 text-white p-2"
       >
           <div className=" fs-4 p-2 ">
               <Link className="text-decoration-none text-white" to={'/'}>Enterprise </Link>
@@ -83,7 +82,7 @@ export default function NavbarDashboard() {
                   </li>
                   <li className=" position-absolute bottom-0 d-flex justify-content-start gap-2 fs-5 fw-bold mb-3 align-items-center">
                       <Link to={"/login"} onClick={()=>localStorage.clear()} >
-                          <MdOutlineLogout /> deconnecter
+                          <span className=" d-block w-maxContent" ><MdOutlineLogout /> deconnecter</span>
                       </Link>
                   </li>
               </ListNav>

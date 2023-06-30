@@ -5,10 +5,11 @@ import { excludeColumn, PropsTableUser, UserTableUser } from "../table/TableUser
 import { MdRemoveRedEye, MdLocationOn } from "react-icons/md"
 import $ from "jquery";
 import { styled } from "styled-components";
-import { useNavigate } from "react-router";
+import { redirect, useNavigate } from "react-router";
 import { booleanString } from "../../utils";
 import { Timestamp } from "firebase/firestore";
-
+import { history } from "../../App";
+// import { useHistory } from "react-router";
 
 
 type Props = {
@@ -28,6 +29,7 @@ export default function LigneTableUser({ user, title, setRefresh }: Props) {
 
     const { setModal } = useModal();
     const navigate = useNavigate()
+    // const history= useHistory()
 
     const handleClick = useCallback((e: MouseEvent) => {
         var classListButton = e.currentTarget.classList;
@@ -38,11 +40,17 @@ export default function LigneTableUser({ user, title, setRefresh }: Props) {
             setModal({ value: <CardFormUser user={user} title={title} setRefresh={setRefresh} /> });
         } else if (classListButton.contains("viewCard")) {
             console.log("viewCard");
-            navigate("/dashboard/map", { state: { user, title } });
+            // history.push("/dashboard/map", { user, title })
+            
+            let optionNavigate = { state: {userString:JSON.stringify(user), title}};
+            navigate("/dashboard/map", optionNavigate )
+            // history.forward();
+            // redirect("/dashboard/map")
+            // navigate("/dashboard/map", { state: { user, title } });
         }
 
 
-    }, [user, title, setModal, navigate, setRefresh])
+    }, [user, title, setModal, setRefresh, navigate])
 
     const tuple = useMemo(()=>{
         let columnData = {...user.compte}

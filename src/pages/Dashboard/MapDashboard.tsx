@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { useLocation } from "react-router"
 import CardFormUser from "../../components/cards/user/CardFormUser";
 import { PropsTableUser, UserTableUser } from "../../components/table/TableUser";
+import { Chauffeur } from "../../Models";
 
 
 type TypeStateLocation = { user: UserTableUser, title: PropsTableUser } | null;
@@ -30,7 +31,20 @@ export default function MapDashboard() {
 
     useEffect(() => {
 
-        setStateLocation(location.state);
+        if(location.state){
+            
+            let objectUser  = JSON.parse(location.state.userString as string)
+            let title = location.state.title;
+            if(title === "chauffeurs"){
+                let newUser = Object.assign(new Chauffeur(Chauffeur.clearDataChauffeur), objectUser) as Chauffeur ;
+                console.log('newUser', newUser)
+                setStateLocation({user: newUser, title: title});
+
+            }
+
+        }
+
+        console.log("location.state =>", location);
 
         var idCurrentPosition:number;
         if (navigator.geolocation) {
@@ -50,7 +64,7 @@ export default function MapDashboard() {
             
         }
 
-    }, [errorCurrentPosition, successCurrentPosition, location.state]);
+    }, [errorCurrentPosition, successCurrentPosition, location]);
 
 
     const center = useMemo(() => ({ lat: 3.7176426750652882, lng: 11.455234485898542 }),[]);
@@ -67,17 +81,23 @@ export default function MapDashboard() {
         )
     }
     return (
-        <div className=" d-flex gap-2 justify-content-around w-100 flex-wrap align-items-center"  >
+        <div className=" d-flex gap-2 justify-content-center w-100 flex-wrap align-items-center p-1"  >
             {
-                stateLocation!=null? <div style={{ flex:1 }} >
-                    <CardFormUser title={stateLocation.title} user={stateLocation.user} />
+                stateLocation!=null? <div className=" w-100 d-flex justify-content-center align-items-center" >
+                    <CardFormUser title={stateLocation.title} user={stateLocation.user} modal={false}  />
                 </div>:null
             }
-            <div style={{ flex:2 , height:"80vh"}} className=" p-2 bg-white shadow-sm"  >
+            <div style={{  height:"80vh", minWidth:"80vw"}} className=" p-2 bg-white shadow-sm"  >
                 <GoogleMap zoom={14} center={coordonnees.lat ? coordonnees : center} mapContainerStyle={{ width: '100%', height: '100%' }} mapTypeId={google.maps.MapTypeId.ROADMAP}  >
                     <MarkerF visible={true} position={coordonnees.lat ? coordonnees : center} zIndex={99} title={stateLocation?.user.compte.nom?.toUpperCase() as string} label={stateLocation?.user.compte.nom?.toUpperCase()}  />
                 </GoogleMap>
             </div>
         </div>
     )
+    // console.log(location)
+    // return (
+    //     <div className=" d-flex justify-content-center align-items-center" >
+    //         {"existe"? "existe": "Rien a l'interieur"}
+    //     </div>
+    // )
 }

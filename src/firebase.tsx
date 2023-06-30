@@ -9,7 +9,7 @@ import {getStorage} from "firebase/storage"
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig:FirebaseApp | FirebaseOptions = {
-    apiKey: "AIzaSyCZ5aoAGlAvAtmBSdb0hvns4Ib48cSzHgE",
+    apiKey: "AIzaSyBgt7VYMvYxir1E6AU5Rt1AW6Fq3qvbzH8",
     authDomain: "analog-antler-380217.firebaseapp.com",
     databaseURL: "https://analog-antler-380217-default-rtdb.europe-west1.firebasedatabase.app",
     projectId: "analog-antler-380217",

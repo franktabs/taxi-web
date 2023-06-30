@@ -4,7 +4,7 @@ import { Chauffeur } from "./Chauffeur";
 import { Compte } from "./Compte";
 import { ChauffeurAttr, CommercialAttr } from "./type";
 import { db, storage } from "../firebase";
-import { codePromo, hashPassword } from "../utils";
+import { checkPassword, codePromo, hashPassword } from "../utils";
 import { ref, uploadBytes, } from "firebase/storage";
 
 const collectionCommercial = collection(db, "commercial") as CollectionReference<CommercialAttr>
@@ -64,15 +64,16 @@ export class Commercial extends Compte {
         dataDocs.forEach((doc) => {
             let dataFirebase = doc.data();
             let password: string = data.password;
-            if (dataFirebase.password === password.trim()) {
-                isExist = true;
-                commercial = new Commercial({ ...dataFirebase, id: doc.id});
-                commercial.compte.password=""
-            }
-            // if (checkPassword(password.trim(), dataFirebase.password)) {
+            
+            // if (dataFirebase.password === password.trim()) {
             //     isExist = true;
-            //     commercial = new Commercial({ ...dataFirebase, id: doc.id });
+            //     commercial = new Commercial({ ...dataFirebase, id: doc.id});
+            //     commercial.compte.password=""
             // }
+            if (checkPassword(password.trim(), dataFirebase.password)) {
+                isExist = true;
+                commercial = new Commercial({ ...dataFirebase, id: doc.id });
+            }
         })
         
         return commercial;
