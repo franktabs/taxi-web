@@ -165,7 +165,7 @@ export default function TableUser({ title = "chauffeurs" }: Props) {
 
         const Toast = Swal.mixin({
             toast: true,
-            position: "center",
+            position: "top",
             showConfirmButton: false,
             timer: 3000,
             timerProgressBar: true,
