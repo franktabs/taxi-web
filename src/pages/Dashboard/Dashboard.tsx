@@ -14,7 +14,6 @@ import $ from "jquery"
 const Dashboard: FunctionComponent = () => {
 
     const { userAuth, setUserAuth } = useUserAuth();
-    const loaderData = useLoaderData() as Compte;
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -48,7 +47,7 @@ const Dashboard: FunctionComponent = () => {
         } else if (userConnect == null) {
             navigate("/login")
         }
-    }, [loaderData, userAuth, setUserAuth, navigate]);
+    }, [ userAuth, setUserAuth, navigate]);
 
     console.log("userAuth=>", userAuth.user);
 

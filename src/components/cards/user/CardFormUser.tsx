@@ -1,7 +1,7 @@
 
 import { BsFillPersonFill } from "react-icons/bs"
 import $ from "jquery"
-import { useCallback, ReactNode, useMemo, MouseEvent, useState } from 'react';
+import { useCallback, ReactNode, useMemo, MouseEvent, useState, useEffect } from 'react';
 import { excludeColumn, includeURLImage, keyAllUsersTable, PropsTableUser, UserTableUser } from "../../table/TableUser";
 import { booleanString } from "../../../utils";
 import { doc, DocumentReference, Timestamp, updateDoc } from "firebase/firestore";
@@ -20,6 +20,7 @@ import { useQuery } from 'react-query';
 import { useQueryClient } from 'react-query';
 import DisplayImage from "../../img/DisplayImage";
 import { stat } from "fs";
+import { isNonNullChain } from "typescript";
 
 type Props = {
     user: UserTableUser,
@@ -43,6 +44,10 @@ export default function CardFormUser({ user, title, isNew = false, setRefresh, m
 
     const [allUsersTable, setAllUsersTable] = useState<Compte[] | null>(null);
     const [enableQueryAllUsersTable, setEnableQueryAllUsersTable] = useState(false);
+
+    useEffect(()=>{
+        setUserModal(user);
+    }, [user])
 
     
     const defaultValuesForm = useMemo(() => {
@@ -308,7 +313,7 @@ export default function CardFormUser({ user, title, isNew = false, setRefresh, m
                 </th>
 
                 <td>
-                    {tdInput}
+                    {tdInput || null}
                 </td>
             </tr>)
         })
@@ -499,7 +504,7 @@ export default function CardFormUser({ user, title, isNew = false, setRefresh, m
             </div>
 
             <div className="p-4 border-top border-2 border-dark">
-                <div className=" d-flex gap-2 justify-content-end fs-6" >
+                <div className=" d-flex gap-2 justify-content-end fs-6 flex-wrap" >
                     {
                         // title === "chauffeurs" ? <>
                         //     <button className=" btn btn-primary" onClick={handleClick} > Valider </button>

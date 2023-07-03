@@ -77,7 +77,7 @@ function Login() {
             let keyStorage: KeyUserLocalStorage = "userAuth.commercial";
             localStorage.setItem(keyStorage, JSON.stringify(instanceUser))
 
-            navigate("/dashboard/utilisateurs", { state: instanceUser })
+            navigate("/dashboard/utilisateurs")
             Toast.fire({
                 icon: "success",
                 title: 'Connexion réussi'
@@ -123,7 +123,7 @@ function Login() {
             localStorage.setItem(keyStorage, JSON.stringify(instanceUser))
 
 
-            navigate("/dashboard/utilisateurs", { state: instanceUser })
+            navigate("/dashboard/utilisateurs")
 
 
             Toast.fire({

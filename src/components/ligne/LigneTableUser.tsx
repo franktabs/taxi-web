@@ -33,11 +33,11 @@ export default function LigneTableUser({ user, title, setRefresh }: Props) {
 
     const handleClick = useCallback((e: MouseEvent) => {
         var classListButton = e.currentTarget.classList;
-
+        console.log("voici le user du click", user)
         if (classListButton.contains("viewUser")) {
             let modal = $(".container-modal");
             modal.toggleClass("d-none");
-            setModal({ value: <CardFormUser user={user} title={title} setRefresh={setRefresh} /> });
+            setModal(state => ({ ...state,  value: <CardFormUser user={user} title={title} setRefresh={setRefresh} />  }));
         } else if (classListButton.contains("viewCard")) {
             console.log("viewCard");
             // history.push("/dashboard/map", { user, title })

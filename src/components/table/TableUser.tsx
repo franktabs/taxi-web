@@ -341,7 +341,7 @@ export default function TableUser({ title = "chauffeurs" }: Props) {
             )
         }
         else if (title === "chauffeurs") {
-            if(userAuth.user instanceof Commercial || userAuth.user instanceof Administrateur){
+            if(userAuth.user instanceof Commercial){
                 return (
                     <div>
                         <div>
